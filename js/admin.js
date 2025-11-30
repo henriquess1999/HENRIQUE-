@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminSession = JSON.parse(localStorage.getItem('adminSession'));
     
     if (!adminSession) {
-        window.location.href = 'admin-login.html';
+        window.location.href = 'admin.login.html';
         return;
     }
     
@@ -1422,7 +1422,7 @@ document.getElementById('changePasswordForm')?.addEventListener('submit', (e) =>
         alert('✅ Senha alterada com sucesso! Faça login novamente com a nova senha.');
         e.target.reset();
         // Redireciona para tela de login do admin
-        window.location.href = 'admin-login.html';
+        window.location.href = 'admin.login.html';
     } catch (err) {
         console.error('Erro ao alterar senha do admin:', err);
         alert('❌ Ocorreu um erro ao salvar a nova senha. Tente novamente.');
