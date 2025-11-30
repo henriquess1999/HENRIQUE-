@@ -1,11 +1,11 @@
 (function(){
-  const ADMIN_USERNAME = 'E2W';
+  const ADMIN_USERNAME = 'E2Wrepresentações@gmail.com.br';
   const PASSWORD_KEY = 'adminPassword';
   const SESSION_KEY = 'adminSession';
   const OTP_KEY = 'adminOtp';
 
   function getPassword(){
-    return localStorage.getItem(PASSWORD_KEY) || ADMIN_USERNAME; // padrão: E2W
+    return localStorage.getItem(PASSWORD_KEY) || 'Will@0906'; // padrão: senha fornecida
   }
 
   function setPassword(pwd){
