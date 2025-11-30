@@ -1376,7 +1376,7 @@ function showNotifications() {
 function logout() {
     if (confirm('Deseja realmente sair?')) {
         localStorage.removeItem('adminSession');
-        window.location.href = 'admin-login.html';
+        window.location.href = 'admin.login.html';
     }
 }
 
