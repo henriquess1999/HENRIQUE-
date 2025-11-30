@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - E2W</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>E2W Admin</span>
+                </div>
+                <h2 data-translate="admin_login">Login Administrativo</h2>
+                <p>Acesso restrito a administradores</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label data-translate="admin_username">Usuário</label>
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="username" value="E2W" required autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label data-translate="admin_password">Senha</label>
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Sua senha" required
+                            autocomplete="current-password">
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="remember">
+                        <span>Lembrar-me</span>
+                    </label>
+                    <a href="#" class="forgot-password" onclick="forgotPasswordFlow()"
+                        data-translate="admin_forgot">Esqueci minha senha</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <span data-translate="admin_signin">Entrar</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+
+                
+            </form>
+
+            <div class="login-footer">
+                <p><i class="fas fa-shield-alt"></i> Acesso seguro com criptografia SSL</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal removido: fluxo agora é acionado diretamente no link "Esqueci minha senha" -->
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        :root {
+            --primary: #bfa14a;
+            --primary-dark: #8c7a2a;
+            --primary-light: #e2c97a;
+            --gray-50: #000000;
+            --gray-100: #0c0c0c;
+            --gray-200: #161616;
+            --gray-300: #222222;
+            --gray-400: #2b2b2b;
+            --gray-500: #a5a5a5;
+            --gray-600: #bbbbbb;
+            --gray-700: #d0d0d0;
+            --gray-800: #e5e5e5;
+            --gray-900: #ffffff;
+        }
+
+        body {
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+        }
+
+        .login-card {
+            background: #0b0b0b;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            animation: slideUp 0.5s ease;
+            border: 1px solid rgba(191,161,74,0.18);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            background: #0f0f0f;
+            color: var(--primary);
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            border-bottom: 2px solid rgba(191,161,74,0.22);
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .login-logo i { font-size: 2.5rem; color: var(--primary); }
+
+        .login-header h2 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+
+        .login-form { padding: 2rem; }
+        .form-group { margin-bottom: 1.1rem; }
+        .form-group label { display:block; margin-bottom:.4rem; color: var(--gray-700); }
+
+        .input-icon { position: relative; min-height: 48px; display:flex; align-items:center; gap:.6rem; }
+
+        .input-icon i { position:static; transform:none; color: var(--gray-600); pointer-events:none; z-index:1; font-size:1rem; margin-left:.2rem; }
+
+        .input-icon input {
+            height: 48px;
+            line-height: 48px;
+            padding: 0 .75rem;
+            background: #0f0f0f;
+            border: 1px solid rgba(191,161,74,0.22);
+            color: var(--gray-900);
+            border-radius: 8px;
+            flex:1 1 auto;
+        }
+        .input-icon input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(191,161,74,0.12); }
+
+        .toggle-password {
+            position: static;
+            height: 36px;
+            width: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-400);
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left:.35rem;
+        }
+
+        .toggle-password:hover { color: var(--primary); }
+
+        .form-options { display:flex; justify-content:space-between; align-items:center; margin: .5rem 0 1.5rem; }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        .checkbox-label span { color: var(--primary); font-weight: 600; }
+
+        .forgot-password { font-size: 0.875rem; color: var(--primary); font-weight: 500; }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .login-footer { padding: 1.5rem 2rem; background: #0f0f0f; text-align: center; border-top:1px solid rgba(191,161,74,0.18); }
+
+        .login-footer p { display:flex; align-items:center; justify-content:center; gap:.5rem; font-size:.875rem; color: var(--gray-700); }
+
+        .login-footer i { color: var(--primary); }
+
+        /* Botão Entrar em dourado centralizado */
+        .login-form button[type="submit"] {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: .6rem;
+            padding: 0.9rem 1.4rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #181818;
+            border: 1px solid rgba(191,161,74,0.35);
+            border-radius: 10px;
+            font-weight: 800;
+            letter-spacing: .2px;
+            box-shadow: 0 6px 18px rgba(191,161,74,0.25);
+            margin: 1rem auto 0;
+            cursor: pointer;
+            width: auto !important;
+            min-width: 160px;
+        }
+        .login-form button[type="submit"]:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(191,161,74,0.32);
+        }
+        .login-form button[type="submit"]:active {
+            transform: translateY(0);
+            box-shadow: 0 6px 18px rgba(191,161,74,0.25);
+        }
+
+        /* Marca d'água */
+        .login-container::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: url('assets/e2w-watermark.svg') center/50% no-repeat;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+
+        /* Fallback com texto E2W se imagem não existir (visível se quiser maior opacidade) */
+        .login-container::after {
+            content: 'E2W';
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22vw;
+            font-weight: 800;
+            color: var(--primary);
+            opacity: 0.03;
+            pointer-events: none;
+        }
+    </style>
+
+    <script src="js/translations.js"></script>
+    <script src="js/admin-auth.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const username = formData.get('username');
+            const password = formData.get('password');
+            const ok = window.AdminAuth.login(username, password);
+            if (ok) {
+                window.location.href = 'admin-dashboarrd.html';
+            } else {
+                alert('❌ Usuário ou senha incorretos!');
+            }
+        });
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Fluxo de recuperação direto no link "Esqueci minha senha"
+        async function forgotPasswordFlow(){
+            const defaultEmail = 'henriquess1999@gmail.com';
+            const to = (prompt('Digite o e-mail administrativo para receber o código:', defaultEmail) || defaultEmail).toString().trim();
+            if (!to) { return; }
+
+            const otp = (''+Math.floor(1000 + Math.random()*9000));
+            window.AdminAuth.setOtp(otp, to, 10);
+
+            const subject = 'Código de Verificação (4 dígitos) - E2W Admin';
+            const origin = (location && location.origin) ? location.origin : '';
+            const base = (origin && origin !== 'null' && origin !== 'file://') ? origin.replace(/\/$/, '') : 'http://localhost:3000';
+            const verifyUrl = `${base}/admin-verify.html?email=${encodeURIComponent(to)}&code=${encodeURIComponent(otp)}`;
+            const html = `
+                <div style="font-family:Inter,Arial,sans-serif;color:#111">
+                    <h2 style="color:#bfa14a">E2W Admin</h2>
+                    <p>Seu código de verificação é:</p>
+                    <p style=\"font-size:32px;font-weight:800;color:#bfa14a;letter-spacing:4px\">${otp}</p>
+                    <p>Este código expira em 10 minutos. Se você não solicitou, ignore este e-mail.</p>
+                    <p style=\"margin-top:1rem;\">Abrir verificação diretamente: 
+                        <a href=\"${verifyUrl}\" style=\"color:#bfa14a;text-decoration:underline;\">Clique aqui</a>
+                    </p>
+                </div>`;
+
+            // Descobrir qual API base está viva (localhost ou 127.0.0.1)
+            async function pickApiBase(){
+                const candidates = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+                for (const url of candidates){
+                    try {
+                        const ctrl = new AbortController();
+                        const t = setTimeout(()=>ctrl.abort(), 1500);
+                        const r = await fetch(url + '/api/health', { signal: ctrl.signal });
+                        clearTimeout(t);
+                        if (r.ok) return url;
+                    } catch(_) {}
+                }
+                return null;
+            }
+
+            try {
+                const apiBase = await pickApiBase();
+                if (!apiBase) throw new Error('Servidor de e-mail local não está ativo.');
+                const resp = await fetch(apiBase + '/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to, subject, html })
+                });
+                if (!resp.ok) throw new Error('Falha ao enviar e-mail');
+                window.open('admin-verify.html?email='+encodeURIComponent(to)+'&code='+encodeURIComponent(otp), '_blank');
+                alert('✅ Código enviado por e-mail! A verificação foi aberta em nova aba.');
+            } catch (err) {
+                console.error(err);
+                alert('⚠️ Não foi possível enviar o e-mail agora. Código gerado localmente: ' + otp + '\nAbrindo verificação em nova aba...');
+                window.open('admin-verify.html?email='+encodeURIComponent(to)+'&code='+encodeURIComponent(otp), '_blank');
+            }
+        }
+
+        // Botão de definir/alterar senha removido a pedido
+
+        // Listener removido: fluxo foi movido para forgotPasswordFlow()
+    </script>
+</body>
+
+</html>

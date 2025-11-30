@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação de Código - E2W</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#bfa14a; --primary-dark:#8c7a2a; --gray-900:#fff; --gray-700:#d0d0d0; }
+        body { background:#000; color:var(--gray-900); font-family:Inter, Arial, sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+        .card { background:#0b0b0b; border:1px solid rgba(191,161,74,0.18); border-radius:16px; padding:2rem; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+        h2 { color:var(--primary); margin:0 0 1rem; }
+        p { color:var(--gray-700); margin:0 0 1rem; }
+        .code-inputs { display:flex; gap:.5rem; justify-content:center; margin:1.2rem 0; }
+        .code-inputs input { width:48px; height:56px; text-align:center; font-size:1.4rem; border-radius:10px; background:#0f0f0f; border:1px solid rgba(191,161,74,0.22); color:#fff; }
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.9rem 1.2rem; border-radius:10px; font-weight:700; cursor:pointer; border:none; }
+        .btn-primary { background:var(--primary); color:#181818; width:100%; }
+        .hint { text-align:center; font-size:.875rem; color:var(--gray-700); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2><i class="fas fa-shield-alt"></i> Verificação de Código</h2>
+        <p>Digite o código de 4 dígitos enviado para: <strong id="emailLabel"></strong></p>
+        <div class="code-inputs" id="codeInputs"></div>
+        <button class="btn btn-primary" id="verifyBtn">Verificar</button>
+        <p class="hint">Este código expira em até 10 minutos.</p>
+    </div>
+
+    <script src="js/admin-auth.js"></script>
+    <script>
+        const params = new URLSearchParams(location.search);
+        const email = params.get('email') || '';
+        const preCode = (params.get('code') || '').replace(/\D/g,'').slice(0,4);
+        document.getElementById('emailLabel').textContent = email;
+
+        // criar quatro inputs
+        const wrap = document.getElementById('codeInputs');
+        const inputs = [];
+        for (let i=0;i<4;i++){
+            const inp = document.createElement('input');
+            inp.type='text'; inp.inputMode='numeric'; inp.maxLength=1;
+            inp.addEventListener('input', (e)=>{ e.target.value=e.target.value.replace(/\D/g,'').slice(0,1); if (e.target.value && i<3) inputs[i+1].focus(); });
+            inp.addEventListener('keydown', (e)=>{ if (e.key==='Backspace' && !e.target.value && i>0) inputs[i-1].focus(); });
+            wrap.appendChild(inp); inputs.push(inp);
+        }
+
+        function getCode(){ return inputs.map(x=>x.value||'').join(''); }
+
+        function verify(){
+            const code = getCode();
+            // Se não houver OTP salvo, use o code da URL para definir um OTP válido por 10 min
+            const existing = window.AdminAuth.getOtp && window.AdminAuth.getOtp();
+            if ((!existing || !existing.code) && code && code.length===4){
+                window.AdminAuth.setOtp(code, email, 10);
+            }
+            if (!window.AdminAuth.verifyOtp(code)){
+                alert('❌ Código inválido ou expirado.');
+                return;
+            }
+            // ok: segue para redefinir senha
+            window.location.href = 'admin-reset.html?email='+encodeURIComponent(email);
+        }
+        document.getElementById('verifyBtn').addEventListener('click', verify);
+
+        // Prefill from param and auto-verify
+        if (preCode && preCode.length===4){
+            preCode.split('').forEach((d, idx)=>{ if (inputs[idx]) inputs[idx].value=d; });
+            setTimeout(verify, 300);
+        }
+    </script>
+</body>
+</html>

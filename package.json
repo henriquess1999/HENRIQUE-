@@ -1,0 +1,22 @@
+{
+  "name": "htms-loja",
+  "version": "1.0.0",
+  "description": "Loja estática com servidor de envio de e-mails",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5",
+    "resend": "^3.0.0",
+    "twilio": "^4.22.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}

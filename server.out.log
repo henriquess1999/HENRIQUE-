@@ -1,0 +1,17 @@
+Rodando na porta 3000 (HTTP nativo)
+[send-email] req {
+  to: 'henriquess1999@gmail.com',
+  subject: 'Teste via servidor E2W',
+  htmlLen: 46,
+  from: 'E2W <onboarding@resend.dev>',
+  apiKeySet: true
+}
+[send-email] success { id: '0a0c2a7d-aa7d-40f0-b1cd-1fc49ea2dbba' }
+[send-email] req {
+  to: 'henriquess1999@gmail.com',
+  subject: 'Código de Verificação (4 dígitos) - E2W Admin',
+  htmlLen: 711,
+  from: 'E2W <onboarding@resend.dev>',
+  apiKeySet: true
+}
+[send-email] success { id: 'cf20b0e5-fa81-4a3a-9bff-7cecd4257fad' }

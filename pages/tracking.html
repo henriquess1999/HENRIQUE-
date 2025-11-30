@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastrear Pedido - CellShop</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .tracking-container {
+            padding: 3rem 0;
+            min-height: calc(100vh - 70px)
+        }
+
+        .tracking-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, .1)
+        }
+
+        .tracking-card h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--primary)
+        }
+
+        .tracking-form {
+            margin-bottom: 3rem
+        }
+
+        .tracking-result {
+            display: none
+        }
+
+        .tracking-result.active {
+            display: block
+        }
+
+        .tracking-timeline {
+            position: relative;
+            padding-left: 3rem
+        }
+
+        .tracking-timeline::before {
+            content: '';
+            position: absolute;
+            left: 18px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gray-300)
+        }
+
+        .tracking-step {
+            position: relative;
+            margin-bottom: 2rem
+        }
+
+        .tracking-step::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--gray-300);
+            z-index: 1
+        }
+
+        .tracking-step.completed::before {
+            background: var(--secondary);
+            border-color: var(--secondary)
+        }
+
+        .tracking-step.completed::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: -2.25rem;
+            top: .5rem;
+            color: #fff;
+            font-size: .875rem
+        }
+
+        .tracking-step h3 {
+            font-size: 1.125rem;
+            margin-bottom: .5rem
+        }
+
+        .tracking-step .date {
+            color: var(--gray-500);
+            font-size: .875rem;
+            margin-bottom: .5rem
+        }
+
+        .tracking-step .description {
+            color: var(--gray-700)
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="../index.html" class="logo"><i class="fas fa-mobile-alt"></i> <span>CellShop</span></a>
+                <a href="../index.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="tracking-container">
+        <div class="container">
+            <div class="tracking-card">
+                <h1><i class="fas fa-truck"></i> Rastrear Pedido</h1>
+
+                <div class="tracking-form">
+                    <form id="trackingForm">
+                        <div class="form-group">
+                            <label>Número do Pedido ou Código de Rastreio</label>
+                            <input type="text" id="trackingCode" placeholder="Ex: ORD-1234567890" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-search"></i> Rastrear
+                        </button>
+                    </form>
+                </div>
+
+                <div class="tracking-result" id="trackingResult">
+                    <div style="background:var(--gray-50);padding:1.5rem;border-radius:.75rem;margin-bottom:2rem">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
+                            <div>
+                                <strong>Pedido:</strong> <span id="orderNumber"></span>
+                            </div>
+                            <div>
+                                <strong>Status:</strong> <span id="orderStatus" class="status-badge success"></span>
+                            </div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between">
+                            <div>
+                                <strong>Código de Rastreio:</strong> <span id="trackingNumber"></span>
+                            </div>
+                            <div>
+                                <strong>Previsão de Entrega:</strong> <span id="estimatedDelivery"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 style="margin-bottom:1.5rem">Histórico de Rastreamento</h2>
+                    <div class="tracking-timeline" id="trackingTimeline">
+                        <!-- Timeline will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/products.js"></script>
+    <script>
+        document.getElementById('trackingForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const code = document.getElementById('trackingCode').value;
+
+            // Check if order exists
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const order = orders.find(o => o.id === code);
+
+            if (!order) {
+                alert('❌ Pedido não encontrado. Verifique o código e tente novamente.');
+                return;
+            }
+
+            // Show tracking result
+            document.getElementById('trackingResult').classList.add('active');
+            document.getElementById('orderNumber').textContent = order.id;
+            document.getElementById('orderStatus').textContent = order.status === 'paid' ? 'Em Trânsito' : 'Processando';
+            document.getElementById('trackingNumber').textContent = 'BR' + Math.random().toString().substr(2, 13) + 'US';
+
+            const deliveryDate = new Date();
+            deliveryDate.setDate(deliveryDate.getDate() + order.shippingDays);
+            document.getElementById('estimatedDelivery').textContent = deliveryDate.toLocaleDateString('pt-BR');
+
+            // Generate timeline
+            const timeline = document.getElementById('trackingTimeline');
+            const events = [
+                { title: 'Pedido Recebido', date: new Date(order.createdAt), description: 'Seu pedido foi recebido e está sendo preparado', completed: true },
+                { title: 'Pagamento Confirmado', date: new Date(order.createdAt), description: 'Pagamento aprovado com sucesso', completed: order.status === 'paid' },
+                { title: 'Pedido Despachado', date: new Date(new Date(order.createdAt).getTime() + 2 * 24 * 60 * 60 * 1000), description: 'Produto saiu do centro de distribuição', completed: order.status === 'paid' },
+                { title: 'Em Trânsito', date: new Date(new Date(order.createdAt).getTime() + 5 * 24 * 60 * 60 * 1000), description: 'Pacote está a caminho do destino', completed: false },
+                { title: 'Entregue', date: deliveryDate, description: 'Pedido entregue no endereço', completed: false }
+            ];
+
+            timeline.innerHTML = events.map(event => `
+                <div class="tracking-step ${event.completed ? 'completed' : ''}">
+                    <h3>${event.title}</h3>
+                    <div class="date">${event.date.toLocaleString('pt-BR')}</div>
+                    <div class="description">${event.description}</div>
+                </div>
+            `).join('');
+
+            // Scroll to result
+            document.getElementById('trackingResult').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Confirmado - CellShop</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="success-container">
+        <div class="container">
+            <div class="success-card">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+
+                <h1>Pedido Confirmado!</h1>
+                <p class="success-message">Obrigado pela sua compra! Seu pedido foi recebido com sucesso.</p>
+
+                <div class="order-info">
+                    <div class="order-number">
+                        <span>Número do Pedido:</span>
+                        <strong id="orderNumber"></strong>
+                    </div>
+
+                    <div class="order-details" id="orderDetails"></div>
+
+                    <div class="pix-section" id="pixSection" style="display: none;">
+                        <h3><i class="fas fa-qrcode"></i> Pague com PIX</h3>
+                        <div class="pix-qr">
+                            <canvas id="pixQRCode"></canvas>
+                        </div>
+                        <div class="pix-code">
+                            <input type="text" id="pixCodeInput" readonly>
+                            <button onclick="copyPixCode()">
+                                <i class="fas fa-copy"></i> Copiar Código
+                            </button>
+                        </div>
+                        <p class="pix-instructions">
+                            Abra o app do seu banco, escolha pagar com PIX via QR Code ou Copia e Cola, e finalize o
+                            pagamento.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="success-actions">
+                    <a href="index.html" class="btn btn-secondary">
+                        <i class="fas fa-home"></i> Voltar para Home
+                    </a>
+                    <a href="pages/tracking.html" class="btn btn-primary">
+                        <i class="fas fa-truck"></i> Rastrear Pedido
+                    </a>
+                </div>
+
+                <div class="order-confirmation">
+                    <i class="fas fa-envelope"></i>
+                    <p>Um e-mail de confirmação foi enviado para <strong id="customerEmail"></strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-container {
+            padding: 2rem;
+        }
+
+        .success-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 3rem;
+            max-width: 700px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s ease;
+        }
+
+        .success-icon i {
+            font-size: 4rem;
+            color: white;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-card h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--gray-900);
+        }
+
+        .success-message {
+            font-size: 1.125rem;
+            color: var(--gray-600);
+            margin-bottom: 2rem;
+        }
+
+        .order-info {
+            background: var(--gray-50);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .order-number {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .order-number strong {
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .order-details {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .order-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+
+        .order-detail-row strong {
+            color: var(--gray-900);
+        }
+
+        .pix-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--gray-200);
+        }
+
+        .pix-section h3 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .pix-qr {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .pix-qr canvas {
+            border: 4px solid var(--gray-200);
+            border-radius: 1rem;
+        }
+
+        .pix-code {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pix-code input {
+            flex: 1;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+
+        .pix-code button {
+            padding: 0.75rem 1.5rem;
+            background: var(--secondary);
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: 600;
+        }
+
+        .pix-code button:hover {
+            background: var(--secondary-dark);
+        }
+
+        .pix-instructions {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            text-align: center;
+        }
+
+        .success-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .success-actions .btn {
+            flex: 1;
+        }
+
+        .order-confirmation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: #dbeafe;
+            border-radius: 0.75rem;
+        }
+
+        .order-confirmation i {
+            font-size: 1.5rem;
+            color: #2563eb;
+        }
+
+        .order-confirmation p {
+            font-size: 0.875rem;
+            color: #1e40af;
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="js/products.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const order = JSON.parse(localStorage.getItem('lastOrder'));
+
+            if (!order) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Display order number
+            document.getElementById('orderNumber').textContent = order.id;
+            document.getElementById('customerEmail').textContent = order.customer.email;
+
+            // Display order details
+            const currency = localStorage.getItem('currency') || 'USD';
+            const orderDetails = document.getElementById('orderDetails');
+            orderDetails.innerHTML = `
+                <div class="order-detail-row">
+                    <span>Status:</span>
+                    <strong style="color: var(--secondary);">${order.status === 'paid' ? 'Pago' : 'Aguardando Pagamento'}</strong>
+                </div>
+                <div class="order-detail-row">
+                    <span>Itens:</span>
+                    <strong>${order.items.reduce((sum, item) => sum + item.quantity, 0)} produto(s)</strong>
+                </div>
+                <div class="order-detail-row">
+                    <span>Total:</span>
+                    <strong>${formatPrice(order.total, currency)}</strong>
+                </div>
+                <div class="order-detail-row">
+                    <span>Prazo de Entrega:</span>
+                    <strong>${order.shippingDays} dias úteis</strong>
+                </div>
+                <div class="order-detail-row">
+                    <span>Endereço:</span>
+                    <strong>${order.customer.city}, ${order.customer.state}</strong>
+                </div>
+            `;
+
+            // Show PIX section if payment method is PIX
+            if (order.paymentMethod === 'pix' && order.pixCode) {
+                const pixSection = document.getElementById('pixSection');
+                pixSection.style.display = 'block';
+
+                // Generate QR Code
+                QRCode.toCanvas(
+                    document.getElementById('pixQRCode'),
+                    order.pixCode,
+                    { width: 250, margin: 1 },
+                    (error) => {
+                        if (error) console.error(error);
+                    }
+                );
+
+                // Show PIX code
+                document.getElementById('pixCodeInput').value = order.pixCode;
+            }
+        });
+
+        function copyPixCode() {
+            const input = document.getElementById('pixCodeInput');
+            input.select();
+            document.execCommand('copy');
+
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+            }, 2000);
+        }
+    </script>
+</body>
+
+</html>

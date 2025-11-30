@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CellShop - Perfil do Usuário">
+<title>Meu Perfil - CellShop</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="index.css">
+<style>
+    .profile-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .profile-sidebar {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        height: fit-content;
+    }
+
+    .profile-content {
+        grid-column: 2 / 4;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        background: white;
+        padding: 2rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb, #10b981);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+    }
+
+    .profile-info h1 {
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-info p {
+        color: var(--gray-500);
+    }
+
+    .profile-badge {
+        display: inline-block;
+        background: #10b981;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+
+    .profile-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .profile-tab {
+        flex: 1;
+        padding: 1rem;
+        border: none;
+        background: none;
+        color: var(--gray-500);
+        font-weight: 500;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .profile-tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+    }
+
+    .profile-tab:hover {
+        color: var(--primary);
+    }
+
+    .profile-tab-content {
+        display: none;
+    }
+
+    .profile-tab-content.active {
+        display: block;
+    }
+
+    .profile-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .profile-section h3 {
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .address-item {
+        padding: 1rem;
+        border: 1px solid var(--gray-200);
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+    }
+
+    .address-item:hover {
+        background: var(--gray-50);
+    }
+
+    .address-info p {
+        margin-bottom: 0.25rem;
+        color: var(--gray-600);
+    }
+
+    .address-label {
+        font-weight: 600;
+        color: var(--gray-900);
+    }
+
+    .order-item {
+        padding: 1.5rem;
+        border: 1px solid var(--gray-200);
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .order-item:hover {
+        background: var(--gray-50);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .order-number {
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .order-status {
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .order-status.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .order-status.completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .order-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        font-size: 0.875rem;
+        color: var(--gray-600);
+    }
+
+    .sidebar-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .sidebar-menu button {
+        text-align: left;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: none;
+        border: none;
+        color: var(--gray-700);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .sidebar-menu button:hover,
+    .sidebar-menu button.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .sidebar-menu button i {
+        margin-right: 0.75rem;
+        width: 20px;
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+    }
+
+    @media (max-width: 1024px) {
+        .profile-container {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-content {
+            grid-column: 1;
+        }
+
+        .profile-sidebar {
+            order: -1;
+        }
+    }
+</style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>CellShop</span>
+                </div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Início</a>
+                    <a href="index.html#products" class="nav-link"><i class="fas fa-box"></i> Produtos</a>
+                </nav>
+                <div class="header-actions">
+                    <button class="cart-btn" id="cartBtn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                    </button>
+                    <button class="user-btn" id="userBtn">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div style="padding: 2rem 0;">
+            <a href="index.html" style="color: var(--primary);"><i class="fas fa-arrow-left"></i> Voltar</a>
+        </div>
+
+        <div class="profile-header" id="profileHeader">
+            <!-- Profile header content will be loaded here -->
+        </div>
+
+        <div class="profile-container">
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <h3 style="margin-bottom: 1rem;">Menu</h3>
+                <div class="sidebar-menu">
+                    <button class="active" onclick="switchTab('info')">
+                        <i class="fas fa-user"></i> Meus Dados
+                    </button>
+                    <button onclick="switchTab('addresses')">
+                        <i class="fas fa-map-marker-alt"></i> Endereços
+                    </button>
+                    <button onclick="switchTab('orders')">
+                        <i class="fas fa-box"></i> Pedidos
+                    </button>
+                    <button onclick="switchTab('security')">
+                        <i class="fas fa-lock"></i> Segurança
+                    </button>
+                    <button onclick="logout()" class="btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="profile-content">
+                <!-- Meus Dados -->
+                <div class="profile-tab-content active" id="infoTab">
+                    <div class="profile-section">
+                        <h3><i class="fas fa-user"></i> Informações Pessoais</h3>
+                        <form id="profileForm">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Nome Completo</label>
+                                    <input type="text" id="userName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>E-mail</label>
+                                    <input type="email" id="userEmail" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>CPF/CNPJ</label>
+                                    <input type="text" id="userDocument" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Telefone</label>
+                                    <input type="tel" id="userPhone">
+                                </div>
+                                <div class="form-group">
+                                    <label>Data de Nascimento</label>
+                                    <input type="date" id="userBirthDate">
+                                </div>
+                                <div class="form-group">
+                                    <label>País</label>
+                                    <input type="text" id="userCountry" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                                Salvar Alterações
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Endereços -->
+                <div class="profile-tab-content" id="addressesTab">
+                    <div class="profile-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h3 style="margin: 0;"><i class="fas fa-map-marker-alt"></i> Meus Endereços</h3>
+                            <button class="btn btn-primary btn-sm" onclick="showAddAddressForm()">
+                                <i class="fas fa-plus"></i> Novo Endereço
+                            </button>
+                        </div>
+                        <div id="addressesList"></div>
+                    </div>
+                </div>
+
+                <!-- Pedidos -->
+                <div class="profile-tab-content" id="ordersTab">
+                    <div class="profile-section">
+                        <h3><i class="fas fa-box"></i> Meus Pedidos</h3>
+                        <div id="ordersList"></div>
+                    </div>
+                </div>
+
+                <!-- Segurança -->
+                <div class="profile-tab-content" id="securityTab">
+                    <div class="profile-section">
+                        <h3><i class="fas fa-lock"></i> Segurança</h3>
+                        <form id="securityForm">
+                            <div class="form-group">
+                                <label>Senha Atual</label>
+                                <input type="password" id="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Nova Senha</label>
+                                <input type="password" id="newPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Confirmar Nova Senha</label>
+                                <input type="password" id="confirmPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Alterar Senha</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" style="margin-top: 4rem;">
+        <div class="container">
+            <div style="text-align: center; padding: 2rem 0;">
+                <p>&copy; 2025 CellShop. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Add Address Modal -->
+    <div class="modal" id="addressModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-map-marker-alt"></i> Novo Endereço</h3>
+                <button class="modal-close" onclick="closeAddressModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addressForm">
+                    <div class="form-group">
+                        <label>Endereço</label>
+                        <input type="text" name="address" required>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Número</label>
+                            <input type="text" name="number" required>
+                        </div>
+                        <div class="form-group">
+                            <label>CEP</label>
+                            <input type="text" name="zipCode" placeholder="12345-678" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Complemento</label>
+                        <input type="text" name="complement" placeholder="Apto, sala, etc">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Cidade</label>
+                            <input type="text" name="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <input type="text" name="state" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Adicionar Endereço</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/translations.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Redirect if not authenticated
+        if (!authManager.isAuthenticated()) {
+            window.location.href = 'index.html';
+        }
+
+        // Load profile data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProfileData();
+            loadAddresses();
+            loadOrders();
+        });
+
+        // Load profile data
+        function loadProfileData() {
+            const user = authManager.currentUser;
+            const profileHeader = document.getElementById('profileHeader');
+            
+            profileHeader.innerHTML = `
+                <div class="profile-avatar">
+                    ${user.name.charAt(0).toUpperCase()}
+                </div>
+                <div class="profile-info">
+                    <h1>${user.name}</h1>
+                    <p>${user.email}</p>
+                    ${user.isCNPJ ? '<span class="profile-badge"><i class="fas fa-building"></i> Acesso Atacado</span>' : ''}
+                </div>
+            `;
+
+            // Fill form
+            document.getElementById('userName').value = user.name;
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userDocument').value = user.document;
+            document.getElementById('userPhone').value = user.phone || '';
+            document.getElementById('userBirthDate').value = user.birthDate || '';
+            document.getElementById('userCountry').value = user.country;
+        }
+
+        // Load addresses
+        function loadAddresses() {
+            const addresses = authManager.getAddresses();
+            const list = document.getElementById('addressesList');
+
+            if (addresses.length === 0) {
+                list.innerHTML = '<p style="color: var(--gray-500); text-align: center;">Nenhum endereço cadastrado</p>';
+                return;
+            }
+
+            list.innerHTML = addresses.map(addr => `
+                <div class="address-item">
+                    <div class="address-info">
+                        <p><span class="address-label">${addr.address}, ${addr.number}</span></p>
+                        ${addr.complement ? `<p>${addr.complement}</p>` : ''}
+                        <p>${addr.city}, ${addr.state} - ${addr.zipCode}</p>
+                    </div>
+                    <button class="btn-danger" onclick="removeAddress(${addr.id})" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                        <i class="fas fa-trash"></i> Remover
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Load orders
+        function loadOrders() {
+            const orders = authManager.getOrders();
+            const list = document.getElementById('ordersList');
+
+            if (orders.length === 0) {
+                list.innerHTML = '<p style="color: var(--gray-500); text-align: center;">Nenhum pedido realizado</p>';
+                return;
+            }
+
+            list.innerHTML = orders.map(order => `
+                <div class="order-item">
+                    <div class="order-header">
+                        <span class="order-number">${order.id}</span>
+                        <span class="order-status ${order.status}">${order.status === 'pending' ? 'Pendente' : 'Entregue'}</span>
+                    </div>
+                    <div class="order-details">
+                        <div>
+                            <strong>Total:</strong> ${formatPrice(order.total, order.currency || 'USD')}
+                        </div>
+                        <div>
+                            <strong>Data:</strong> ${new Date(order.createdAt).toLocaleDateString('pt-BR')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Tab switching
+        function switchTab(tab) {
+            // Hide all tabs
+            document.querySelectorAll('.profile-tab-content').forEach(t => {
+                t.classList.remove('active');
+            });
+
+            // Update buttons
+            document.querySelectorAll('.sidebar-menu button').forEach(b => {
+                b.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tab + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Address functions
+        function showAddAddressForm() {
+            document.getElementById('addressModal').classList.add('active');
+        }
+
+        function closeAddressModal() {
+            document.getElementById('addressModal').classList.remove('active');
+        }
+
+        document.getElementById('addressForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const address = Object.fromEntries(formData);
+            
+            const result = authManager.addAddress(address);
+            if (result.success) {
+                showNotification(result.message, 'success');
+                closeAddressModal();
+                loadAddresses();
+                e.target.reset();
+            } else {
+                showNotification(result.message, 'error');
+            }
+        });
+
+        function removeAddress(id) {
+            if (confirm('Deseja remover este endereço?')) {
+                const result = authManager.removeAddress(id);
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    loadAddresses();
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            }
+        }
+
+        // Profile form
+        document.getElementById('profileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const updates = {
+                name: document.getElementById('userName').value,
+                phone: document.getElementById('userPhone').value,
+                birthDate: document.getElementById('userBirthDate').value,
+                country: document.getElementById('userCountry').value
+            };
+
+            const result = authManager.updateProfile(updates);
+            if (result.success) {
+                showNotification(result.message, 'success');
+                loadProfileData();
+            } else {
+                showNotification(result.message, 'error');
+            }
+        });
+
+        // Security form (placeholder)
+        document.getElementById('securityForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showNotification('Funcionalidade em desenvolvimento', 'info');
+        });
+
+        // Logout
+        function logout() {
+            if (confirm('Deseja fazer logout?')) {
+                authManager.logout();
+                showNotification('Logout realizado com sucesso!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('addressModal').addEventListener('click', (e) => {
+            if (e.target.id === 'addressModal') {
+                closeAddressModal();
+            }
+        });
+    </script>
+</body>
+</html>

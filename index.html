@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description"
+    content="CellShop - Eletrônicos Premium. Os melhores produtos eletrônicos com entrega internacional.">
+<title>CellShop - Eletrônicos Premium</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="index.css">
+<link rel="stylesheet" href="enhanced.css">
+</head>
+
+<body>
+    <!-- SVG filters para nitidez (aplicados via CSS) -->
+    <svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden;">
+        <defs>
+            <!-- leve -->
+            <filter id="mild-sharpen" x="0" y="0" width="100%" height="100%">
+                <feConvolveMatrix order="3" kernelMatrix="-1 -1 -1 -1 10 -1 -1 -1 -1" divisor="1" preserveAlpha="true" />
+            </filter>
+            <!-- forte (usar com cuidado) -->
+            <filter id="strong-sharpen" x="0" y="0" width="100%" height="100%">
+                <feConvolveMatrix order="3" kernelMatrix="-1 -1 -1 -1 16 -1 -1 -1 -1" divisor="1" preserveAlpha="true" />
+            </filter>
+        </defs>
+    </svg>
+    <!-- Header novo centralizado -->
+    <header class="header" style="background:#181818;box-shadow:none;padding:2rem 0 1.5rem 0;">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
+                <div style="width:360px;display:flex;align-items:center;justify-content:center;margin-bottom:0.6rem;">
+                <img src="logo-e2w.jpeg" alt="E2W Representações" class="header-logo-img" style="max-width:100%;height:auto;display:block;">
+            </div>
+                <span style="display:none;" id="header-brand-text">E2W REPRESENTAÇÕES</span>
+                <span id="header-subtitle" style="display:none;font-size:1.2rem;color:#bfa14a;text-align:center;margin-top:0.5rem;">Equipamentos Industriais & Construção Civil</span>
+            <!-- Botões de ação (Admin + Carrinho) -->
+            <button class="admin-btn" id="adminBtn" title="Administrador" onclick="location.href='admin.login.html'" style="position:absolute;top:0.5rem;right:4.3rem;background:rgba(34,34,34,0.92);border:none;border-radius:50%;padding:0.7rem 0.9rem;box-shadow:0 2px 12px #0006;cursor:pointer;z-index:10;border:2px solid #bfa14a;">
+                <i class="fas fa-user-shield" style="font-size:1.35rem;color:#bfa14a;"></i>
+            </button>
+            <!-- Botão do carrinho -->
+            <button class="cart-btn" id="cartBtn" style="position:absolute;top:0.5rem;right:0.5rem;background:rgba(34,34,34,0.92);border:none;border-radius:50%;padding:0.7rem 0.9rem;box-shadow:0 2px 12px #0006;cursor:pointer;z-index:10;">
+                <i class="fas fa-shopping-cart" style="font-size:1.5rem;color:#bfa14a;"></i>
+                <span class="cart-count" id="cartCount" style="position:absolute;top:0.2rem;right:0.2rem;background:#bfa14a;color:#181818;font-size:0.95rem;font-weight:700;border-radius:50%;padding:0.1rem 0.5rem;min-width:1.5rem;text-align:center;">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Banner institucional centralizado -->
+    <section id="home" style="background:#111111;min-height:320px;display:flex;align-items:center;justify-content:center;">
+        <div style="text-align:center;width:100%;max-width:700px;margin:auto;">
+            <h1 style="font-size:2.8rem;font-weight:900;color:#bfa14a;letter-spacing:2px;">Soluções para Construção Civil e Indústria</h1>
+            <p style="color:#e2c97a;font-size:1.3rem;margin:1.5rem 0 2.5rem 0;">Bitoneiras, Andaimes, Ferramentas, EPI, Elétrica, Hidráulica e muito mais para sua obra ou empresa.</p>
+            <a href="#produtos-industriais" class="btn btn-primary btn-lg" style="font-size:1.2rem;padding:1rem 2.5rem;">Ver Produtos</a>
+        </div>
+    </section>
+    <!-- Hero Section with Video/Slider -->
+    <section class="hero" id="home">
+        <div class="hero-slider" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 220px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: center; justify-content: center; margin-top: 2.5rem; margin-bottom: 2.5rem; width: 100%;">
+                <a href="#produtos-anmax" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('all'); location.hash='produtos-anmax';" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
+                    <img src="https://anmax.com.br/wp-content/uploads/2024/09/logo-anmax.png" alt="Logo Anmax" style="max-width: 260px; min-width: 120px; filter: contrast(1.18) brightness(1.13) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
+                </a>
+                <a id="hero-cr-btn" href="#produtos-crn" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('brasilcr'); setTimeout(function(){ var el = document.getElementById('cr-novos') || document.getElementById('produtos-crn'); if(el) el.scrollIntoView({behavior:'smooth', block: 'start'}); else location.hash='produtos-crn'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
+                    <img src="https://cdn.dooca.store/929/files/logo-cr-n-1.png" alt="Logo CRN" style="max-width: 260px; min-width: 120px; filter: contrast(1.18) brightness(1.13) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
+                </a>
+                <a href="#produtos-flach" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('flach'); setTimeout(function(){ var el = document.getElementById('produtos-flach'); if(el) el.scrollIntoView({behavior:'smooth', block: 'start'}); else location.hash='produtos-flach'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
+                    <img src="https://flachequipamentos.com.br/wp-content/uploads/elementor/thumbs/logo-header-flach-r3it9j0min289ukpjo4vt5afknkuh0kn9ge5lzss48.png" alt="Logo Flach" style="max-width: 260px; min-width: 120px; filter: contrast(1.18) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
+                </a>
+                <a id="hero-up-btn" href="#produtos-up" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('up'); setTimeout(function(){ var el = document.getElementById('produtos-up'); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); else location.hash='produtos-up'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
+                    <img src="https://www.upequipamentos.com.br/wp-content/uploads/2021/03/Logotipo-UP-_v2.svg" alt="Logo UP Equipamentos" style="max-width: 220px; min-width: 90px; filter: contrast(1.18) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
+                </a>
+            </div>
+        </div>
+
+        <!-- Slider Controls -->
+        <button class="slider-btn prev" id="prevSlide"><i class="fas fa-chevron-left"></i></button>
+        <button class="slider-btn next" id="nextSlide"><i class="fas fa-chevron-right"></i></button>
+
+        <div class="slider-dots" id="sliderDots"></div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="container">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h3 data-translate="feature1_title" style="color:#000;">Entrega Estadual</h3>
+                    <p data-translate="feature1_desc" style="color:#000;">Enviamos para todo o Maranhão</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3 data-translate="feature2_title" style="color:#000;">Compra Segura</h3>
+                    <p data-translate="feature2_desc" style="color:#000;">Pagamento 100% protegido</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-headset"></i>
+                    <h3 data-translate="feature3_title" style="color:#000;">Suporte 24/7</h3>
+                    <p data-translate="feature3_desc" style="color:#000;">Atendimento sempre disponível</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-award"></i>
+                    <h3 data-translate="feature4_title" style="color:#000;">Produtos Originais</h3>
+                    <p data-translate="feature4_desc" style="color:#000;">Garantia de autenticidade</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section" id="products">
+        <div class="container">
+            <div id="produtos-anmax"></div>
+            <div class="section-header">
+                <h2 class="products-standard-title" data-translate="products_title">Nossos Produtos</h2>
+                <div style="display:flex;justify-content:center;align-items:center;margin:1.2rem 0 1.5rem 0;">
+                    <img src="https://anmax.com.br/wp-content/uploads/2024/09/logo-anmax.png" alt="Logo Anmax" style="max-width:220px;min-width:120px;width:auto;filter:contrast(1.18) brightness(1.13) saturate(1.13) drop-shadow(0 4px 24px #000a);">
+                </div>
+            </div>
+
+            <!-- Category Filters -->
+
+            <!-- Products Grid principal (ANMAX / lista geral) -->
+            <div id="produtos-crn"></div>
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be loaded here by JavaScript -->
+            </div>
+            <div id="pagination" class="pagination" style="display:flex;justify-content:center;margin:2rem 0 1rem 0;"></div>
+            </div>
+
+            <!-- Partner banner: BrasilCR - título acima e imagem deslocada para baixo -->
+            <div style="display:flex;flex-direction:column;align-items:center;margin-top:0;">
+                <h2 class="products-standard-title">Nossos Produtos</h2>
+                <div style="display:flex;justify-content:center;align-items:center;margin-top:28px;max-width:420px;width:100%;">
+                    <img src="https://brasilcr.com.br/wp-content/uploads/logo-cr-n-1.png" alt="BrasilCR" style="width:100%;height:auto;display:block;filter:contrast(1.05) saturate(1.02);box-shadow:0 6px 18px rgba(0,0,0,0.12);cursor:default;pointer-events:none;">
+                </div>
+            </div>
+            <!-- Novos Produtos da BrasilCR -->
+            <div id="cr-novos" style="text-align:center;margin-top:1.6rem;">
+                <h4 style="margin:0 0 0.8rem 0;font-size:1.25rem;font-weight:800;color:#181818;">Novos Produtos</h4>
+                <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(201)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/DSC_0370.jpg" alt="Martelo Rompedor" style="width:160px;height:160px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">Martelo Rompedor SDS PLUS Industrial 4Joules 28mm 920W com Maleta MRC28.920-4J</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(201);">Ver produto</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(309)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/PRINCIPAL-41.jpg" alt="Furadeira de Impacto" style="width:160px;height:160px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">Furadeira de Impacto Velocidade Variável e Reversível 1/2 Pol. 850W FIC13.850</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(309);">Ver produto</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(301)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/PRINCIPAL-51.jpg" alt="Lixadeira Roto Orbital" style="width:160px;height:160px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">Lixadeira Roto Orbital Industrial 5 Pol. 300W – CR DO BRASIL-LRC125300</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(301);">Ver produto</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(317)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/%E4%BE%A7%E9%9D%A2-1.jpg" alt="SERRA MARMORE 1680 WATTS SMC110.1680" style="width:160px;height:160px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">SERRA MARMORE 1680 WATTS SMC110.1680</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(317);">Ver produto</button>
+                        </div>
+                    </div>
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(320)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/PRINCIPAL-29.jpg" alt="Máquina De Solda Inversora Mini MSC225MINI" style="width:160px;height:160px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">Máquina De Solda Inversora Mini Com Display Digital MSC225MINI</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(320);">Ver produto</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(318)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/PRINCIPAL-30.jpg" alt="Tupia Manual 6mm 1/4 pol. 550W TLC06.550" style="width:160px;height:160px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">Tupia Manual 6mm 1/4 pol. 550W TLC06.550</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(318);">Ver produto</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(319)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/STC90.750.jpg" alt="Serra Tico Tico 750W STC90.750" style="width:160px;height:160px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">Serra Tico Tico 750W STC90.750</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(319);">Ver produto</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(302)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/3.jpg" alt="Esmerilhadeira 115mm" style="width:160px;height:160px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">ESMERILHADEIRA 115MM (4-1/2") EAC115.900</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(302);">Ver produto</button>
+                        </div>
+                    </div>
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(311)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/12.30100-2-4-4.jpg" alt="Combo de Parafusadeira de Impacto e Furadeira 12V Máx. Li-ion Bivolt com Maleta 12.30100-2" style="width:160px;height:160px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">Combo de Parafusadeira de Impacto e Furadeira 12V Máx. Li-ion Bivolt com Maleta 12.30100-2</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(311);">Ver produto</button>
+                        </div>
+                    </div>
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(316)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/PRINCIPAL-2-7.jpg" alt="PARAFUSADEIRA A BATERIA IMPACTO 20V QIC1020.35N" style="width:160px;height:160px;object-fit:contain;background:#f5f5f5;border-radius:6px;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">PARAFUSADEIRA A BATERIA IMPACTO 20V QIC1020.35N</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(316);">Ver produto</button>
+                        </div>
+                    </div>
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(312)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/QFC1012.25N.jpg" alt="Furadeira e Parafusadeira à Bateria 12 V Máx Lithium-Ion QFC1012.25N" style="width:160px;height:160px;object-fit:contain;background:#f5f5f5;border-radius:6px;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">Furadeira e Parafusadeira à Bateria 12 V Máx Lithium-Ion QFC1012.25N</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(312);">Ver produto</button>
+                        </div>
+                    </div>
+                    <div class="product-card cr-new-card" style="max-width:260px;width:100%;cursor:pointer;" onclick="showProductModal(306)">
+                        <div style="padding:0.8rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.8rem;box-shadow:0 6px 20px rgba(0,0,0,0.06);">
+                            <img src="https://brasilcr.com.br/wp-content/uploads/LADO-13.jpg" alt="Martelo Demolidor" style="width:160px;height:160px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">MARTELO DEMOLIDOR 28MM SEXTAVADO 48 JOULES 1600W MDC28.1600-48J</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:120px;text-transform:none;" onclick="event.stopPropagation();showProductModal(306);">Ver produto</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logo UP abaixo dos produtos da CR e seção produtos-up -->
+            <div id="produtos-up" style="text-align:center;margin-top:2rem;">
+                <h2 class="products-standard-title">Nossos Produtos</h2>
+                <div style="display:flex;justify-content:center;align-items:center;margin-top:8px;max-width:420px;width:100%;">
+                    <img src="https://www.upequipamentos.com.br/wp-content/uploads/2025/11/Logotipo-UP-_v2.svg" alt="UP Equipamentos" style="display:block;max-width:100%;height:auto;pointer-events:none;" />
+                </div>
+                    <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+                    <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;">
+                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(401)">
+                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                <img src="https://www.upequipamentos.com.br/wp-content/uploads/2025/07/UP-Equipamentos-Linha-Eletrica-Transpaleteira-Eletrica-15-TON-Litio.webp" alt="Paleteira Elétrica UP-CBD15" style="width:260px;height:180px;object-fit:contain;">
+                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Paleteira Elétrica 1,5ton Lítio UP-CBD15</h5>
+                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(401);">Ver produto</button>
+                            </div>
+                        </div>
+
+                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(402)">
+                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                <img src="https://www.equipacenter.com.br/media/catalog/product/cache/7c77f8fc44ed84362f498f3d56f9ad95/e/m/empilhadeira-eletrica-patolada-1500kg_1.jpg" alt="Empilhadeira UP-CDD15R-E" style="width:260px;height:180px;object-fit:contain;">
+                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Empilhadeira Elétrica 1,5ton 3m UP-CDD15R-E</h5>
+                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(402);">Ver produto</button>
+                            </div>
+                        </div>
+                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(403)">
+                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                <img src="https://tse3.mm.bing.net/th/id/OIP.OPgvqLGneUYPp80PCKYrswHaHa?pid=Api&P=0&h=180" alt="Empilhadeira Embarcada UP-CDDK 15" style="width:260px;height:180px;object-fit:contain;">
+                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Empilhadeira Elétrica Embarcada 1,5ton – 5,6 metros UP-CDDK 15 – III</h5>
+                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(403);">Ver produto</button>
+                            </div>
+                        </div>
+                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(404)">
+                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                <img src="https://www.htmaquinasbrasil.com.br/wp-content/uploads/2024/06/Electric_Reach_Truck_1.6-2_Tonne_CQD16-20.jpg" alt="Empilhadeira UP-CQD20-D-12M" style="width:260px;height:180px;object-fit:contain;">
+                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Empilhadeira Elétrica Embarcada 2,0ton – UP-CQD20-D-12M</h5>
+                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(404);">Ver produto</button>
+                            </div>
+                        </div>
+                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(405)">
+                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                <img src="https://www.htmaquinasbrasil.com.br/wp-content/uploads/2024/06/Electric_Reach_Truck_1.6-2_Tonne_CQD16-20.jpg" alt="Empilhadeira UP-CQD25-D-12,5M" style="width:260px;height:180px;object-fit:contain;">
+                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Empilhadeira Retrátil 2,5TON 12,5M UP-CQD25-D-12,5M</h5>
+                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(405);">Ver produto</button>
+                            </div>
+                        </div>
+                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(406)">
+                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                <img src="https://images.tcdn.com.br/img/img_prod/673916/paleteira_hidraulica_3000kg_x_685mm_longa_xtrong_xpl_3062_779763_1_ecd72734b9ab6aa19ac6815b0e22bf06.jpg" alt="Paleteira Hidráulica 3,0 TON XPL-3062" style="width:260px;height:180px;object-fit:contain;">
+                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Paleteira Hidráulica 3,0 TON XPL-3062</h5>
+                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(406);">Ver produto</button>
+                            </div>
+                        </div>
+                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(407)">
+                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                <img src="https://eme54.ru/upload/iblock/065/fed8oue9kzxz530vorwk9ae0glss2a8k/75dcd0f3-1aa5-11eb-b334-3cfdfea44ee4_e98f754b-7c08-11eb-b362-3cfdfea44ee4.jpg" alt="ELEVUS 8 – PLATAFORMA ELEVATÓRIA – UP-GTWY8-100" style="width:260px;height:180px;object-fit:contain;">
+                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">ELEVUS 8 – PLATAFORMA ELEVATÓRIA – UP-GTWY8-100</h5>
+                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(407);">Ver produto</button>
+                            </div>
+                        </div>
+                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(408)">
+                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                <img src="https://tse1.mm.bing.net/th/id/OIP.wfE8XaBYJDcMUOsDOCEtKAHaHa?pid=Api&P=0&h=180" alt="Andaime Tubular 1M X 1,5M" style="width:260px;height:180px;object-fit:contain;">
+                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Andaime Tubular 1M X 1,5M</h5>
+                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(408);">Ver produto</button>
+                            </div>
+                        </div>
+                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(409)">
+                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                <img src="https://tse2.mm.bing.net/th/id/OIP.jC76BKgtQxH4lBL3wdjxAwHaHa?pid=Api&P=0&h=180" alt="Piso Galvanizado para Andaime 037×1,5m – UP152.3" style="width:260px;height:180px;object-fit:contain;">
+                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Piso Galvanizado para Andaime 037×1,5m – UP152.3</h5>
+                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(409);">Ver produto</button>
+                            </div>
+                        </div>
+                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(418)">
+                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                <img src="https://www.newmaqlocadora.com.br/wp-content/uploads/2023/09/guarda_corpo.jpg" alt="CONJUNTO GUARDA CORPO 1,5M COM PORTA UP153.1" style="width:260px;height:180px;object-fit:contain;">
+                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">CONJUNTO GUARDA CORPO 1,5M COM PORTA UP153.1</h5>
+                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(418);">Ver produto</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logo Flach abaixo dos produtos UP -->
+            <div id="produtos-flach" style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin:4rem 0 3rem 0;">
+                <h2 class="products-standard-title">Nossos Produtos</h2>
+                <img src="https://flachequipamentos.com.br/wp-content/uploads/elementor/thumbs/logo-header-flach-r3it9j0min289ukpjo4vt5afknkuh0kn9ge5lzss48.png" alt="Flach Equipamentos" class="flach-logo" style="max-width:320px;width:100%;height:auto;margin-top:3rem;" onclick="window.forceFirstPage=true; loadProducts('flach'); setTimeout(function(){ var el=document.getElementById('produtos-flach'); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); }, 180);">
+                <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-top:1.6rem;">
+                    <div class="product-card flach-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(430)">
+                        <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                            <img src="https://flachequipamentos.com.br/wp-content/uploads/APF-1000C-1.png" alt="Auxiliar de Partida Flach APF-1000C" style="width:260px;height:180px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Auxiliar de Partida Flach APF-1000C</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(430);">Ver produto</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card flach-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(454)">
+                        <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                            <img src="https://flachequipamentos.com.br/wp-content/uploads/CTF_500A-1.png" alt="Cabo de Transferência 500A" style="width:260px;height:180px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Cabo de Transferência 500A</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(454);">Ver produto</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card flach-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(433)">
+                        <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                            <img src="https://flachequipamentos.com.br/wp-content/uploads/Produto-TPF-2000-7.png" alt="Testador de Baterias Flach TPF-2000" style="width:260px;height:180px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Testador de Baterias com impressora 12/24V Flach TPF-2000</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(433);">Ver produto</button>
+                        </div>
+                    </div>
+                    <div class="product-card flach-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(448)">
+                        <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                            <img src="https://flachequipamentos.com.br/wp-content/uploads/F0A5725.jpg" alt="Carregador Inteligente de Bateria F10" style="width:260px;height:180px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Carregador Inteligente de Bateria F10</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(448);">Ver produto</button>
+                        </div>
+                    </div>
+                    <div class="product-card flach-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(436)">
+                        <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                            <img src="https://flachequipamentos.com.br/wp-content/uploads/IFP2000-scaled.png" alt="Inversor Senoidal Puro IFP2000" style="width:260px;height:180px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Inversor Senoidal Puro IFP2000</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(436);">Ver produto</button>
+                        </div>
+                    </div>
+                    <div class="product-card flach-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(446)">
+                        <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                            <img src="https://flachequipamentos.com.br/wp-content/uploads/CF-10A-2.jpg" alt="Conversor de Tensão Flach CF-10A" style="width:260px;height:180px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Conversor de Tensão Flach CF-10A</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(446);">Ver produto</button>
+                        </div>
+                    </div>
+                    <div class="product-card flach-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(441)">
+                        <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                            <img src="https://flachequipamentos.com.br/wp-content/uploads/F60-1.jpg" alt="Carregador Inteligente de Bateria F60 RNEW" style="width:260px;height:180px;object-fit:contain;">
+                            <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Carregador Inteligente de Bateria F30 RNEW</h5>
+                            <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(441);">Ver produto</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Register CTA -->
+            <div class="register-cta">
+                <div class="register-cta-content">
+                    <i class="fas fa-user-plus"></i>
+                    <h3 data-translate="register_title">Cadastre-se e receba ofertas exclusivas!</h3>
+                    <p data-translate="register_desc">Fique por dentro das melhores promoções</p>
+                    <button class="btn btn-primary" onclick="showRegisterModal()">
+                        <span data-translate="register_btn">Cadastrar-se Agora</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wholesale Section replaced by Reels carousel -->
+    <section class="wholesale-section" id="wholesale">
+        <div class="container">
+            <div class="wholesale-content">
+                <div class="reel-carousel" id="reelCarousel">
+                    <iframe class="reel-frame" src="https://www.instagram.com/reel/DQecRWPjuOh/embed" allow="autoplay; fullscreen" loading="lazy" title="Reel 1"></iframe>
+                    <iframe class="reel-frame" src="https://www.instagram.com/reel/DRjzYwnjh9c/embed" allow="autoplay; fullscreen" loading="lazy" title="Reel 2"></iframe>
+                    <iframe class="reel-frame" src="https://www.instagram.com/reel/DRJrn3sDq3y/embed" allow="autoplay; fullscreen" loading="lazy" title="Reel 3"></iframe>
+                    <iframe class="reel-frame" src="https://www.instagram.com/reel/DQ2D3R7juVN/embed" allow="autoplay; fullscreen" loading="lazy" title="Reel 4"></iframe>
+                </div>
+                <!-- imagem lateral removida conforme solicitado -->
+            </div>
+        </div>
+        <script src="js/reel-rotator.js"></script>
+        <script src="js/reel-local-loader.js"></script>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">
+                        <img src="logo-e2w.jpeg" alt="E2W Representações" class="footer-logo-img">
+                    </div>
+                    <div class="social-links">
+                        <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4 data-translate="footer_shop">Comprar</h4>
+                    <ul>
+                        <li><a href="#products" data-translate="footer_products">Produtos</a></li>
+                        <li><a href="#" data-translate="footer_promo">Promoções</a></li>
+                    </ul>
+                </div>
+
+                
+
+                <div class="footer-col contact">
+                    <h4 data-translate="footer_contact">Contato</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> <a href="mailto:e2wrepresentacoes@gmail.com">e2wrepresentacoes@gmail.com</a></li>
+                        <li><i class="fas fa-phone"></i> <a href="tel:+5599985465885">+55 (99) 98546-5885</a></li>
+                        <li><i class="fas fa-clock"></i> <span data-translate="footer_hours">24/7 Suporte</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 E2W REPRESENTAÇÕES. <span data-translate="footer_rights">Todos os direitos reservados.</span></p>
+                <div class="payment-methods">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-amex"></i>
+                    <i class="fab fa-cc-paypal"></i>
+                    <i class="fas fa-qrcode" title="PIX"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Modal -->
+    <div class="modal" id="cartModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3><i class="fas fa-shopping-cart" style="color:#181818;"></i> <span data-translate="cart_title" style="color:#181818;">Meu Carrinho</span></h3>
+                <button class="modal-close" onclick="closeCartModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="cartItems"></div>
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span data-translate="cart_subtotal">Subtotal:</span>
+                        <span id="cartSubtotal">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span data-translate="cart_shipping">Frete:</span>
+                        <span id="cartShipping" data-translate="cart_calculated">Calculado no checkout</span>
+                    </div>
+                    <div class="summary-row summary-total">
+                        <span data-translate="cart_total">Total:</span>
+                        <span id="cartTotal">$0.00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCartModal()" data-translate="cart_continue">Continuar
+                    Comprando</button>
+                <button class="btn btn-primary" onclick="goToCheckout()" data-translate="cart_checkout">Finalizar
+                    Pedido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> <span data-translate="register_modal_title">Cadastro</span></h3>
+                <button class="modal-close" onclick="closeRegisterModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label data-translate="form_name">Nome Completo</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="form_email">E-mail</label>
+                        <input type="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="form_password">Senha</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="form_country">País</label>
+                        <select name="country" required>
+                            <option value="BR">Brasil</option>
+                            <option value="US">Estados Unidos</option>
+                            <option value="CA">Canadá</option>
+                            <option value="ES">Espanha</option>
+                            <option value="PT">Portugal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="form_city">Cidade</label>
+                        <input type="text" name="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="form_doc">CPF ou CNPJ</label>
+                        <input type="text" name="document" placeholder="000.000.000-00" required>
+                        <small data-translate="form_doc_hint">CNPJ libera acesso ao atacado</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block"
+                        data-translate="register_submit">Cadastrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wholesale Modal -->
+    <div class="modal" id="wholesaleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-warehouse"></i> <span data-translate="wholesale_modal_title">Área de Atacado</span>
+                </h3>
+                <button class="modal-close" onclick="closeWholesaleModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span data-translate="wholesale_info">Esta área é exclusiva para clientes com CNPJ cadastrado. Por
+                        favor, faça login ou cadastre-se.</span>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="showRegisterModal(); closeWholesaleModal();"
+                    data-translate="wholesale_register">Cadastrar CNPJ</button>
+                <button class="btn btn-secondary btn-block" onclick="closeWholesaleModal()"
+                    data-translate="wholesale_cancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script src="js/translations.js"></script>
+    <script src="js/product-translations.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/logo-fix.js"></script>
+</body>
+
+</html>
