@@ -273,6 +273,15 @@
     <script src="js/translations.js"></script>
     <script src="js/admin-auth.js"></script>
     <script>
+        // AVISO: script temporário para garantir acesso durante o deploy.
+        // Define a senha administrativa padrão para permitir login: remover após validação.
+        try {
+            localStorage.setItem('adminPassword', 'Will@0906');
+        } catch (e) {
+            console.warn('Não foi possível definir adminPassword no localStorage:', e);
+        }
+    </script>
+    <script>
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
