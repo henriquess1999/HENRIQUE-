@@ -655,7 +655,7 @@ function loadProducts() {
         return `
             <tr>
                 <td><img src="${product.image}" alt="${product.name}" class="product-image-small"></td>
-                <td><strong>${product.name}</strong></td>
+                <td><strong class="product-name">${product.name}</strong></td>
                 <td>${getCategoryName(product.category)}</td>
                 <td class="action-buttons">
                     <button class="action-btn view" onclick="viewProduct(${product.id})">

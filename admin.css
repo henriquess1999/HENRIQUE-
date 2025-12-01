@@ -595,10 +595,10 @@
 #products-section .admin-table td:nth-child(2) strong,
 #products-section .admin-table td:nth-child(2) .product-name {
     display: block;
-    font-size: 1.05rem;
-    font-weight: 700;
+    font-size: 1.25rem;
+    font-weight: 800;
     color: #f9fafb;
-    line-height: 1.25;
+    line-height: 1.2;
 }
 
 /* Aumentar legibilidade dos cabeçalhos da tabela de produtos */
