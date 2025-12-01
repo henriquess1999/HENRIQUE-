@@ -571,7 +571,9 @@
     padding: 1rem;
     border-bottom: 1px solid rgba(191,161,74,0.2);
     color: var(--primary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    /* permitir quebrar linhas para nomes longos */
+    white-space: normal;
 }
 
 .admin-table tr:hover {
@@ -579,10 +581,29 @@
 }
 
 .product-image-small {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
     object-fit: cover;
     border-radius: var(--radius-md);
+}
+
+/* Estilos específicos para a aba Produtos (melhor visualização dos nomes) */
+#products-section .admin-table td:nth-child(2) {
+    max-width: 42ch;
+    vertical-align: middle;
+}
+#products-section .admin-table td:nth-child(2) strong,
+#products-section .admin-table td:nth-child(2) .product-name {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #f9fafb;
+    line-height: 1.25;
+}
+
+/* Aumentar legibilidade dos cabeçalhos da tabela de produtos */
+#products-section .admin-table th {
+    font-size: 0.9rem;
 }
 
 .status-badge {
