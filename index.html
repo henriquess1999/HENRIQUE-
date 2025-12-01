@@ -6,8 +6,9 @@
 <title>CellShop - Eletrônicos Premium</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="index.css">
-<link rel="stylesheet" href="enhanced.css">
+<!-- version query appended to force browser reload when we update the page -->
+<link rel="stylesheet" href="index.css?v=20251201.1">
+<link rel="stylesheet" href="enhanced.css?v=20251201.1">
 </head>
 
 <body>
@@ -25,9 +26,9 @@
         </defs>
     </svg>
     <!-- Header novo centralizado -->
-    <header class="header" style="background:#181818;box-shadow:none;padding:2rem 0 1.5rem 0;">
+    <header class="header" style="background:#181818;box-shadow:none;padding:1rem 0 0.6rem 0;">
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
-                <div style="width:360px;display:flex;align-items:center;justify-content:center;margin-bottom:0.6rem;">
+                <div style="width:220px;max-width:60%;display:flex;align-items:center;justify-content:center;margin-bottom:0.4rem;">
                 <img src="logo-e2w.jpeg" alt="E2W Representações" class="header-logo-img" style="max-width:100%;height:auto;display:block;">
             </div>
                 <span style="display:none;" id="header-brand-text">E2W REPRESENTAÇÕES</span>
@@ -45,10 +46,10 @@
     </header>
 
     <!-- Banner institucional centralizado -->
-    <section id="home" style="background:#111111;min-height:320px;display:flex;align-items:center;justify-content:center;">
+    <section id="home" style="background:#111111;min-height:180px;display:flex;align-items:center;justify-content:center;">
         <div style="text-align:center;width:100%;max-width:700px;margin:auto;">
-            <h1 style="font-size:2.8rem;font-weight:900;color:#bfa14a;letter-spacing:2px;">Soluções para Construção Civil e Indústria</h1>
-            <p style="color:#e2c97a;font-size:1.3rem;margin:1.5rem 0 2.5rem 0;">Bitoneiras, Andaimes, Ferramentas, EPI, Elétrica, Hidráulica e muito mais para sua obra ou empresa.</p>
+            <h1 style="font-size:2rem;font-weight:900;color:#bfa14a;letter-spacing:1.5px;">Soluções para Construção Civil e Indústria</h1>
+            <p style="color:#e2c97a;font-size:1rem;margin:1rem 0 1.4rem 0;">Bitoneiras, Andaimes, Ferramentas, EPI, Elétrica, Hidráulica e muito mais para sua obra ou empresa.</p>
             <a href="#produtos-industriais" class="btn btn-primary btn-lg" style="font-size:1.2rem;padding:1rem 2.5rem;">Ver Produtos</a>
         </div>
     </section>
@@ -62,8 +63,8 @@
                 <a id="hero-cr-btn" href="#produtos-crn" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('brasilcr'); setTimeout(function(){ var el = document.getElementById('cr-novos') || document.getElementById('produtos-crn'); if(el) el.scrollIntoView({behavior:'smooth', block: 'start'}); else location.hash='produtos-crn'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
                     <img src="https://cdn.dooca.store/929/files/logo-cr-n-1.png" alt="Logo CRN" style="max-width: 260px; min-width: 120px; filter: contrast(1.18) brightness(1.13) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
                 </a>
-                <a href="#produtos-flach" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('flach'); setTimeout(function(){ var el = document.getElementById('produtos-flach'); if(el) el.scrollIntoView({behavior:'smooth', block: 'start'}); else location.hash='produtos-flach'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
-                    <img src="https://flachequipamentos.com.br/wp-content/uploads/elementor/thumbs/logo-header-flach-r3it9j0min289ukpjo4vt5afknkuh0kn9ge5lzss48.png" alt="Logo Flach" style="max-width: 260px; min-width: 120px; filter: contrast(1.18) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
+                <a href="#produtos-flach" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('flach'); setTimeout(function(){ var el = document.getElementById('produtos-flach'); if(el) el.scrollIntoView({behavior:'smooth', block: 'start'}); else location.hash='produtos-flach'; }, 180);" style="background:#ffffff;border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px rgba(0,0,0,0.08);transition:transform 0.2s;cursor:pointer;border:1px solid rgba(0,0,0,0.08);">
+                    <img src="https://flachequipamentos.com.br/wp-content/uploads/elementor/thumbs/logo-header-flach-r3it9j0min289ukpjo4vt5afknkuh0kn9ge5lzss48.png" alt="Logo Flach" style="max-width: 260px; min-width: 120px; filter: none; background:#ffffff;">
                 </a>
                 <a id="hero-up-btn" href="#produtos-up" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('up'); setTimeout(function(){ var el = document.getElementById('produtos-up'); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); else location.hash='produtos-up'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
                     <img src="https://www.upequipamentos.com.br/wp-content/uploads/2021/03/Logotipo-UP-_v2.svg" alt="Logo UP Equipamentos" style="max-width: 220px; min-width: 90px; filter: contrast(1.18) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
@@ -557,14 +558,15 @@
 
     
 
-    <script src="js/translations.js"></script>
-    <script src="js/product-translations.js"></script>
-    <script src="js/products.js"></script>
-    <script src="js/cart.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/search.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/logo-fix.js"></script>
+    <!-- local scripts with version for cache-busting -->
+    <script src="js/translations.js?v=20251201.1"></script>
+    <script src="js/product-translations.js?v=20251201.1"></script>
+    <script src="js/products.js?v=20251201.1"></script>
+    <script src="js/cart.js?v=20251201.1"></script>
+    <script src="js/auth.js?v=20251201.1"></script>
+    <script src="js/search.js?v=20251201.1"></script>
+    <script src="js/main.js?v=20251201.1"></script>
+    <script src="js/logo-fix.js?v=20251201.1"></script>
 </body>
 
 </html>

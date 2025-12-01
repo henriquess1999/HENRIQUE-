@@ -85,10 +85,15 @@
                             </div>
 
                             <div class="form-row">
-                                <button type="button" class="btn btn-primary btn-block" onclick="placeOrder()">
-                                    <span data-translate="place_order">Finalizar Pedido</span>
-                                    <i class="fas fa-check"></i>
-                                </button>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+                                    <button type="button" class="btn btn-primary" onclick="placeOrder()">
+                                        <span data-translate="place_order">Finalizar Pedido</span>
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button id="testEmailBtn" type="button" class="btn btn-secondary" title="Enviar e-mail de teste ao administrador">
+                                        Testar envio de e-mail
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -478,7 +483,11 @@
 
     <script src="js/translations.js"></script>
     <script src="js/products.js"></script>
-    <script src="js/checkout.js"></script>
+        <script>
+            // Default endpoint for local development. Use 127.0.0.1 to avoid hostname resolution issues.
+            window.SMS_NOTIFY_ENDPOINT = window.SMS_NOTIFY_ENDPOINT || 'http://127.0.0.1:3000/api/notify-sms';
+        </script>
+        <script src="js/checkout.js"></script>
         <script>
             // Ocultar linhas do resumo com valor 0 e remover seguro
             document.addEventListener('DOMContentLoaded', function(){
@@ -542,6 +551,37 @@
                         </div>
                     `;
                 }).join('');
+            });
+
+            // Test Email button behavior (improved diagnostics)
+            document.addEventListener('DOMContentLoaded', function(){
+                const btn = document.getElementById('testEmailBtn');
+                if (!btn) return;
+                btn.addEventListener('click', async function(){
+                    btn.disabled = true;
+                    const original = btn.innerHTML;
+                    btn.innerHTML = 'Enviando...';
+                    try {
+                        const base = window.SMS_NOTIFY_ENDPOINT ? window.SMS_NOTIFY_ENDPOINT.replace('/api/notify-sms','') : 'http://127.0.0.1:3000';
+                        const url = base + '/api/test-email';
+                        console.log('[testEmailBtn] calling', url);
+                        const res = await fetch(url, { mode: 'cors' });
+                        const text = await res.text().catch(()=>null);
+                        let json = null;
+                        try { json = text ? JSON.parse(text) : null; } catch(e) { json = null; }
+                        if (res.ok) {
+                            alert('✅ E-mail de teste solicitado. Verifique sua caixa de entrada (ou spam).');
+                        } else {
+                            alert(`❌ Falha ao solicitar e-mail — status ${res.status} ${res.statusText} — ${json && json.error ? json.error : (text || 'sem corpo')}`);
+                        }
+                    } catch (err) {
+                        alert('Erro ao chamar ' + (window.SMS_NOTIFY_ENDPOINT ? window.SMS_NOTIFY_ENDPOINT.replace('/api/notify-sms','') : 'http://127.0.0.1:3000') + '/api/test-email: ' + (err && err.message ? err.message : err));
+                        console.error('[testEmailBtn] fetch error', err);
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = original;
+                    }
+                });
             });
         </script>
 </body>

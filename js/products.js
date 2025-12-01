@@ -1390,16 +1390,22 @@ const products = [
 // (customProducts em localStorage). A lista mesclada fica em window.products
 // para ser reutilizada em outras partes do site.
 try {
-    const customProducts = JSON.parse(localStorage.getItem('customProducts') || '[]');
-    if (Array.isArray(customProducts) && customProducts.length) {
-        const baseWithoutCustom = products.filter(bp => !customProducts.some(cp => cp.id === bp.id));
+    const customProductsRaw = JSON.parse(localStorage.getItem('customProducts') || '[]');
+    const customProducts = Array.isArray(customProductsRaw) ? customProductsRaw.map(cp => ({ ...cp, _isCustom: true })) : [];
+    if (customProducts.length) {
+        // Clonar os produtos base e remover o campo `price` para garantir que
+        // apenas produtos adicionados via admin mantenham preços visíveis/numéricos.
+        const baseWithoutCustom = products
+            .filter(bp => !customProducts.some(cp => cp.id === bp.id))
+            .map(bp => ({ ...bp, price: undefined }));
         window.products = [...baseWithoutCustom, ...customProducts];
     } else {
-        window.products = products;
+        // Nenhum produto custom: expor a lista base, mas sem preços (requisito do cliente)
+        window.products = products.map(p => ({ ...p, price: undefined }));
     }
 } catch (e) {
-    console.warn('Falha ao carregar customProducts, usando apenas products base:', e);
-    window.products = products;
+    console.warn('Falha ao carregar customProducts, usando apenas products base (sem preços):', e);
+    window.products = products.map(p => ({ ...p, price: undefined }));
 }
 
 // Gerar avaliações para cada produto em todos os idiomas
@@ -1414,22 +1420,21 @@ window.products.forEach(product => {
 (function markPromotions(){
     try {
         const excluded = new Set(['brasilcr','up','flach']);
-        // Elegíveis: somente ANMAX (não parceiros)
-        const eligible = window.products.filter(p => p && !excluded.has(p.category));
+        // Elegíveis: aplicar apenas sobre o catálogo base (variáveis definidas em `products`),
+        // evitando modificar produtos adicionados dinamicamente pelo admin (em localStorage)
+        const sourceList = (typeof products !== 'undefined' && Array.isArray(products)) ? products : (Array.isArray(window.products) ? window.products : []);
+        const eligible = sourceList.filter(p => p && !excluded.has(p.category));
         // Alternar: um produto SIM, outro NÃO
         let applied = 0;
         eligible.forEach((p, idx) => {
             const isPromo = idx % 2 === 0; // alterna: 0 = sim, 1 = não
             if (isPromo) {
+                // Apenas marcar como badge — NÃO modificar o nome original do produto
                 p.badge = 'Promoção';
-                if (typeof p.name === 'string' && !/promoção/i.test(p.name)) {
-                    p.name = `${p.name} — Promoção`;
-                }
                 applied++;
             } else {
                 // Remover quaisquer marcas prévias de promoção do nome/badge
                 if (p.badge === 'Promoção') p.badge = undefined;
-                if (typeof p.name === 'string') p.name = p.name.replace(/\s*—\s*Promoção/i, '').trim();
             }
         });
         window.promoSelection = eligible.filter((_, idx) => idx % 2 === 0).map(p => ({ id: p.id, name: p.name }));
@@ -1453,11 +1458,23 @@ function generateStars(rating) {
 }
 
 function formatPrice(price, currency = 'USD') {
-    const rates = { USD: 1, BRL: 5.0 };
-    const value = price * (rates[currency] || 1);
-    return currency === 'BRL'
-        ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-        : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    // Garantir que `price` seja um número válido (pode vir em string com vírgula)
+    let numeric = Number(price);
+    if (isNaN(numeric)) {
+        try {
+            const cleaned = String(price).replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.\-]/g, '');
+            numeric = Number(cleaned);
+        } catch (e) {
+            numeric = 0;
+        }
+    }
+    numeric = isNaN(numeric) ? 0 : numeric;
+    // Não aplicar multiplicadores artificiais; assume-se que o valor armazenado
+    // já está na moeda desejada. Apenas formatar de acordo com a moeda.
+    if (currency === 'BRL') {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numeric);
+    }
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(numeric);
 }
 
 function getCategoryName(category) {
@@ -1471,6 +1488,7 @@ function loadProducts(category = 'all') {
     if (!grid) return;
     const lang = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'pt';
     const currency = localStorage.getItem('currency') || 'USD';
+    const IMAGE_PLACEHOLDER = 'https://via.placeholder.com/420x340?text=Sem+imagem';
     // Trabalha sempre com a lista mesclada (base + custom) em window.products
     const source = Array.isArray(window.products) ? window.products : products;
 
@@ -1513,17 +1531,22 @@ function loadProducts(category = 'all') {
     const paginated = list.slice((currentPage - 1) * pageSize, currentPage * pageSize);
     grid.innerHTML = paginated.map(p => {
         const desc = typeof getProductDescription === 'function' ? getProductDescription(p.id, lang) : p.description;
-        const bestImage = p.images && p.images.length > 0 ? p.images[0] : p.image;
+        const bestImage = (p.images && p.images.length > 0) ? p.images[0] : (p.image || IMAGE_PLACEHOLDER);
+        if (!p.image && !(p.images && p.images.length)) {
+            console.warn('Produto sem imagem:', p.id, p.name);
+        }
         return `
             <div class="product-card" data-category="${p.category}">
                 <div class="product-image" onclick="showProductModal(${p.id})">
-                    <img src="${bestImage}" alt="${p.name}" loading="lazy" style="cursor:pointer;image-rendering:crisp-edges;">
+                    <img src="${bestImage}" alt="${p.name}" loading="lazy" style="cursor:pointer;object-fit:contain;max-width:100%;max-height:260px;">
                     ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
                 </div>
                     <div class="product-info">
                     <div class="product-category">${getCategoryName(p.category)}</div>
                     <h3 class="product-name">${p.name}</h3>
-                    <p class="product-description">${desc}</p>
+                    ${p._isCustom ? `<div class="product-price" style="margin:0.35rem 0; font-weight:800; color:var(--primary);">${formatPrice(p.price || 0, currency)}</div>` : ''}
+                    <p id="card-desc-${p.id}" class="product-description" style="white-space:normal;word-break:break-word;overflow-wrap:break-word;line-height:1.45;margin:0.4rem 0;max-height:72px;overflow:hidden;transition:max-height 0.25s ease;">${desc}</p>
+                    <button id="card-toggle-${p.id}" class="btn btn-link" style="padding:0;margin-top:0.25rem;color:var(--primary);" onclick="toggleCardDescription(${p.id})">Ver mais</button>
                     <div class="product-rating"><div class="stars">${generateStars(p.rating)}</div><span class="rating-count">(${p.reviews})</span></div>
                     <div class="product-footer" style="display:flex;justify-content:center;align-items:center;margin-top:1.2rem;gap:0.6rem;">
                         <div style="display:flex;align-items:center;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff;">
@@ -1552,10 +1575,38 @@ function loadProducts(category = 'all') {
     }
 }
 
-window.changeProductPage = function(page) {
+    window.changeProductPage = function(page) {
     window.currentProductPage = page;
     loadProducts();
 }
+
+    // Toggle inline description on product card (expand / collapse)
+    window.toggleCardDescription = function(productId) {
+        try {
+            const desc = document.getElementById('card-desc-' + productId);
+            const btn = document.getElementById('card-toggle-' + productId);
+            if (!desc || !btn) return;
+            const expanded = desc.getAttribute('data-expanded') === '1';
+            if (!expanded) {
+                // expand to full content height: remove -webkit-line-clamp and allow normal flow
+                desc.style.display = 'block';
+                desc.style.maxHeight = desc.scrollHeight + 'px';
+                // ensure any webkit clamp is not applied inline
+                try { desc.style.webkitLineClamp = 'unset'; } catch(e){}
+                btn.textContent = 'Ver menos';
+                desc.setAttribute('data-expanded', '1');
+            } else {
+                // collapse: restore CSS-controlled clamping (remove inline display so stylesheet applies)
+                desc.style.maxHeight = '72px';
+                desc.style.display = '';
+                try { desc.style.webkitLineClamp = ''; } catch(e){}
+                btn.textContent = 'Ver mais';
+                desc.setAttribute('data-expanded', '0');
+            }
+        } catch (e) {
+            console.warn('toggleCardDescription error', e);
+        }
+    }
 
 // Sempre que adicionar um produto novo, forçar exibição da página 1
 window.forceFirstPage = true;
@@ -1675,6 +1726,7 @@ window.showProductModal = function showProductModal(productId) {
                         <div>
                             <div class="product-category" style="background:var(--primary);color:#fff;padding:0.4rem 0.8rem;border-radius:6px;display:inline-block;font-weight:600;margin-bottom:1rem;">${getCategoryName(product.category)}</div>
                             <h2 style="margin:0.6rem 0;font-size:2.1rem;color:#181818;">${product.name}</h2>
+                            ${product._isCustom ? `<div class="modal-price" style="margin-bottom:0.6rem;font-size:1.25rem;color:var(--primary);font-weight:800;">${formatPrice(product.price || 0, localStorage.getItem('currency') || 'USD')}</div>` : ''}
                             <div style="margin-bottom:1rem;color:var(--gray-600);">${generateStars(product.rating)} <strong style="color:var(--gray-800);">${product.rating}</strong> · <small>(${product.reviews})</small></div>
                             ${variantsHtml}
                             <div style="margin-top:0.6rem;display:flex;align-items:center;gap:0.6rem;">
@@ -1685,7 +1737,10 @@ window.showProductModal = function showProductModal(productId) {
                                     <button type="button" onclick="(function(ev){ ev && ev.stopPropagation(); const el=document.getElementById('qty-${product.id}'); let v=parseInt(el.textContent,10)||1; el.textContent = v+1; })(event)" style="border:none;background:transparent;padding:0.45rem 0.7rem;font-size:1.05rem;cursor:pointer;">+</button>
                                 </div>
                             </div>
-                            <p style="color:var(--gray-700);">${typeof getProductDescription === 'function' ? getProductDescription(product.id, lang) : product.description}</p>
+                            <div style="margin-top:0.6rem;">
+                                <div id="desc-block-${product.id}" class="product-description" style="color:var(--gray-700);white-space:normal;word-break:break-word;overflow-wrap:break-word;line-height:1.5;max-height:120px;overflow:hidden;transition:max-height 0.28s ease;">${typeof getProductDescription === 'function' ? getProductDescription(product.id, lang) : product.description}</div>
+                                <button id="desc-toggle-${product.id}" class="btn btn-link" style="display:block;margin-top:0.5rem;padding:0;border:0;background:none;color:var(--primary);cursor:pointer;">Ver mais</button>
+                            </div>
                             ${product.colors? `<div style="margin-top:1rem;"><h4 style="margin:0 0 0.5rem 0;">${trans.product_colors}</h4><div style="display:flex;gap:0.6rem;">${colorsHtml}</div><p style="margin-top:0.5rem;color:var(--gray-600);">${trans.selected}: <strong id="selectedColor">${product.colors[0].name}</strong></p></div>` : ''}
                             ${product.devices? `<div style="margin-top:1rem;"><h4 style="margin:0 0 0.5rem 0;">${trans.product_devices}</h4><select id="deviceSelect" style="width:100%;padding:0.6rem;border:1px solid #e5e7eb;border-radius:6px;">${devicesOptions}</select><p style="margin-top:0.5rem;color:var(--gray-600);">${trans.device}: <strong id="selectedDevice">${product.devices[product.devices.length-1]}</strong></p></div>` : ''}
                             <div style="display:flex;gap:0.8rem;margin-top:1rem;">
@@ -1706,7 +1761,7 @@ window.showProductModal = function showProductModal(productId) {
     (function(){
         const sel = modalEl.querySelector(`#variantSelect-${product.id}`);
         if (!sel) return;
-        sel.addEventListener('change', function() {
+            sel.addEventListener('change', function() {
             const pid = parseInt(this.value, 10);
             const variant = products.find(x => x.id === pid);
             if (!variant) return;
@@ -1735,6 +1790,16 @@ window.showProductModal = function showProductModal(productId) {
                     thumbsEls[0].style.border = '2px solid var(--primary)';
                 }
             }
+                // Atualizar preço no modal caso exista e seja de produto custom
+                const priceEl = modalEl.querySelector('.modal-price');
+                if (priceEl) {
+                    if (variant._isCustom) {
+                        priceEl.textContent = formatPrice(variant.price || 0, localStorage.getItem('currency') || 'USD');
+                    } else {
+                        // ocultar preço para variantes não custom
+                        priceEl.remove();
+                    }
+                }
         });
     })();
 
@@ -1768,6 +1833,39 @@ window.showProductModal = function showProductModal(productId) {
             });
         });
     }
+
+    // Toggle de descrição longa (Mostrar / Ver menos)
+    (function attachDescToggle(){
+        try {
+            const descEl = modalEl.querySelector('#desc-block-' + product.id);
+            const toggleBtn = modalEl.querySelector('#desc-toggle-' + product.id);
+            if (!descEl || !toggleBtn) return;
+            // garantir valor inicial: começar colapsado
+            descEl.style.maxHeight = '120px';
+            let expanded = false;
+            // garantir que o botão esteja visível para permitir expansão quando o usuário desejar
+            toggleBtn.style.display = 'block';
+            toggleBtn.addEventListener('click', function(e){
+                e.preventDefault();
+                expanded = !expanded;
+                if (expanded) {
+                    // remove clamp and allow full height
+                    descEl.style.display = 'block';
+                    try { descEl.style.webkitLineClamp = 'unset'; } catch(e){}
+                    descEl.style.maxHeight = descEl.scrollHeight + 'px';
+                    toggleBtn.textContent = 'Ver menos';
+                } else {
+                    // collapse: restore CSS clamp by removing inline display
+                    descEl.style.maxHeight = '120px';
+                    descEl.style.display = '';
+                    try { descEl.style.webkitLineClamp = ''; } catch(e){}
+                    toggleBtn.textContent = 'Ver mais';
+                }
+            });
+        } catch (e) {
+            console.warn('Erro ao anexar toggle de descrição', e);
+        }
+    })();
 
     // Efeito de lupa (zoom on hover) na imagem principal
     const mainMediaContainer = modalEl.querySelector('#mainMediaContainer');

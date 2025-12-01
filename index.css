@@ -1459,6 +1459,33 @@ body {
     padding: var(--space-xl);
 }
 
+/* Melhorias de leitura da descrição do produto no modal (especialmente mobile)
+   - cor mais escura para contraste
+   - tamanho e altura de linha aumentados em telas pequenas
+   - remover cursor 'zoom-in' que confundia usuários
+   - permitir rolagem/overflow quando necessário em mobile
+*/
+#productModal .product-description {
+    cursor: auto !important;
+    color: #222222 !important;
+    font-size: 1rem !important;
+    line-height: 1.65 !important;
+    max-height: 180px !important;
+    overflow: auto !important;
+    padding-right: 0.35rem;
+}
+
+@media (max-width: 768px) {
+    .modal-content.modal-lg { max-width: 95% !important; padding: 1rem !important; }
+    #productModal .product-description {
+        font-size: 1.05rem !important;
+        line-height: 1.8 !important;
+        max-height: none !important;
+    }
+    #productModal .modal-body { padding: 1rem !important; }
+    #productModal #mainMediaContainer { height: auto !important; min-height: 220px; }
+}
+
 .modal-footer {
     padding: var(--space-xl);
 

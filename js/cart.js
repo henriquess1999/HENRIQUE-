@@ -6,7 +6,8 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 // Add item to cart
 function addToCart(productId, quantity = 1) {
-    const product = products.find(p => p.id === productId);
+    const source = Array.isArray(window.products) ? window.products : products;
+    const product = source.find(p => p.id === productId);
     if (!product) return;
 
     quantity = parseInt(quantity, 10) || 1;
@@ -70,7 +71,7 @@ function updateCartUI() {
 // Get cart subtotal
 function getCartSubtotal() {
     const currency = localStorage.getItem('currency') || 'USD';
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * item.quantity), 0);
     return { amount: total, formatted: formatPrice(total, currency) };
 }
 

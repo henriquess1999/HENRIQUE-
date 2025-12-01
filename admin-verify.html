@@ -48,23 +48,43 @@
 
         function getCode(){ return inputs.map(x=>x.value||'').join(''); }
 
-        function verify(){
+        async function tryVerifyOnBase(base, email, code){
+            try{
+                const resp = await fetch(base + '/api/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code }),
+                    mode: 'cors'
+                });
+                const data = await resp.json().catch(()=>null);
+                if (resp.ok && data && data.ok) return { ok:true, data };
+                return { ok:false, data };
+            }catch(e){
+                return { ok:false, error: e && e.message ? e.message : String(e) };
+            }
+        }
+
+        async function verify(){
             const code = getCode();
-            // Se não houver OTP salvo, use o code da URL para definir um OTP válido por 10 min
-            const existing = window.AdminAuth.getOtp && window.AdminAuth.getOtp();
-            if ((!existing || !existing.code) && code && code.length===4){
-                window.AdminAuth.setOtp(code, email, 10);
+            if (!code || code.length !== 4){ alert('Digite o código de 4 dígitos.'); return; }
+
+            // Tenta verificar no backend conhecido (não usar location.origin porque a página pode estar servida por Live Server)
+            const candidates = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://127.0.0.1:3001'];
+            let lastErr = null;
+            for (const base of candidates){
+                const res = await tryVerifyOnBase(base, email, code);
+                if (res.ok){
+                    window.location.href = 'admin-reset.html?email='+encodeURIComponent(email);
+                    return;
+                }
+                lastErr = res;
             }
-            if (!window.AdminAuth.verifyOtp(code)){
-                alert('❌ Código inválido ou expirado.');
-                return;
-            }
-            // ok: segue para redefinir senha
-            window.location.href = 'admin-reset.html?email='+encodeURIComponent(email);
+            console.warn('[verify] falha em todas as bases', lastErr);
+            alert('❌ Código inválido ou expirado.');
         }
         document.getElementById('verifyBtn').addEventListener('click', verify);
 
-        // Prefill from param and auto-verify
+        // Prefill from param (se o código vier no e-mail por link) e auto-verify
         if (preCode && preCode.length===4){
             preCode.split('').forEach((d, idx)=>{ if (inputs[idx]) inputs[idx].value=d; });
             setTimeout(verify, 300);

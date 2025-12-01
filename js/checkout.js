@@ -573,7 +573,7 @@ function getCheckoutTotals() {
     };
 }
 
-function placeOrder() {
+async function placeOrder() {
     const form = document.getElementById('shippingForm');
     if (!form) return;
 
@@ -649,6 +649,82 @@ function placeOrder() {
     // limpa carrinhos usados no front
     localStorage.removeItem('checkoutCart');
     localStorage.removeItem('cart');
+
+    // Enviar notificação de pedido (SMS) ao admin — configure `SMS_NOTIFY_ENDPOINT` abaixo
+    try {
+        // endpoint configurável: defina `window.SMS_NOTIFY_ENDPOINT` no HTML (inline) ou substitua aqui
+        const SMS_NOTIFY_ENDPOINT = window.SMS_NOTIFY_ENDPOINT || '';
+        if (SMS_NOTIFY_ENDPOINT) {
+            const payload = { order };
+
+            // Helper: fetch with timeout
+            const fetchWithTimeout = (url, options, timeout = 4000) => {
+                return Promise.race([
+                    fetch(url, options),
+                    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), timeout))
+                ]);
+            };
+
+            try {
+                // Tenta enviar e aguardar resposta curta antes de redirecionar
+                await fetchWithTimeout(SMS_NOTIFY_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }, 4000);
+            } catch (err) {
+                // Se falhar por timeout ou erro de rede, tenta sendBeacon como último recurso (não bloqueante)
+                try {
+                    if (navigator.sendBeacon) {
+                        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                        navigator.sendBeacon(SMS_NOTIFY_ENDPOINT, blob);
+                        console.info('Notificação SMS enviada via sendBeacon (fallback).');
+                    } else {
+                        console.warn('Falha ao enviar notificação SMS e sendBeacon não disponível:', err);
+                    }
+                } catch (e2) {
+                    console.warn('Erro no fallback sendBeacon para notificação SMS:', e2);
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('Erro ao tentar notificar por SMS:', e);
+    }
+
+    // Notificar o servidor para enviar e-mail ao admin com todos os dados do pedido
+    try {
+        const ORDER_NOTIFY_ENDPOINT = window.ORDER_NOTIFY_ENDPOINT || '/api/order-complete';
+        const payload = { order };
+        // Envia sem bloquear, mas tenta breve timeout antes do redirecionamento
+        const fetchWithTimeout = (url, options, timeout = 4000) => {
+            return Promise.race([
+                fetch(url, options),
+                new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), timeout))
+            ]);
+        };
+        try {
+            await fetchWithTimeout(ORDER_NOTIFY_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }, 3000);
+        } catch (err) {
+            // Tentativa falhou (timeout/rede) — faz sendBeacon como fallback
+            try {
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                    navigator.sendBeacon(ORDER_NOTIFY_ENDPOINT, blob);
+                    console.info('Notificação de pedido enviada via sendBeacon (fallback).');
+                } else {
+                    console.warn('Falha ao notificar servidor do pedido e sendBeacon não disponível:', err);
+                }
+            } catch (e2) {
+                console.warn('Erro no fallback sendBeacon para notificação de pedido:', e2);
+            }
+        }
+    } catch (e) {
+        console.warn('Erro ao notificar servidor para envio de e-mail:', e);
+    }
 
     // mensagem de sucesso e voltar para a home
     alert('✅ Pedido finalizado com sucesso!');

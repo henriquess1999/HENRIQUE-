@@ -311,58 +311,62 @@
 
         // Fluxo de recuperação direto no link "Esqueci minha senha"
         async function forgotPasswordFlow(){
+            // Abre a aba de verificação imediatamente (evita bloqueio de pop-up)
+            const popup = window.open('admin-verify.html', '_blank');
             const defaultEmail = 'E2Wrepresentações@gmail.com.br';
             const to = (prompt('Digite o e-mail administrativo para receber o código:', defaultEmail) || defaultEmail).toString().trim();
             if (!to) { return; }
 
-            const otp = (''+Math.floor(1000 + Math.random()*9000));
-            window.AdminAuth.setOtp(otp, to, 10);
+            const origin = (location && location.origin) ? location.origin.replace(/\/$/, '') : 'http://127.0.0.1:3000';
+            const verifyUrl = `${origin}/admin-verify.html?email=${encodeURIComponent(to)}`;
 
-            const subject = 'Código de Verificação (4 dígitos) - E2W Admin';
-            const origin = (location && location.origin) ? location.origin : '';
-            const base = (origin && origin !== 'null' && origin !== 'file://') ? origin.replace(/\/$/, '') : 'http://localhost:3000';
-            const verifyUrl = `${base}/admin-verify.html?email=${encodeURIComponent(to)}&code=${encodeURIComponent(otp)}`;
-            const html = `
-                <div style="font-family:Inter,Arial,sans-serif;color:#111">
-                    <h2 style="color:#bfa14a">E2W Admin</h2>
-                    <p>Seu código de verificação é:</p>
-                    <p style=\"font-size:32px;font-weight:800;color:#bfa14a;letter-spacing:4px\">${otp}</p>
-                    <p>Este código expira em 10 minutos. Se você não solicitou, ignore este e-mail.</p>
-                    <p style=\"margin-top:1rem;\">Abrir verificação diretamente: 
-                        <a href=\"${verifyUrl}\" style=\"color:#bfa14a;text-decoration:underline;\">Clique aqui</a>
-                    </p>
-                </div>`;
-
-            // Descobrir qual API base está viva (localhost ou 127.0.0.1)
-            async function pickApiBase(){
-                const candidates = ['http://localhost:3000', 'http://127.0.0.1:3000'];
-                for (const url of candidates){
-                    try {
-                        const ctrl = new AbortController();
-                        const t = setTimeout(()=>ctrl.abort(), 1500);
-                        const r = await fetch(url + '/api/health', { signal: ctrl.signal });
-                        clearTimeout(t);
-                        if (r.ok) return url;
-                    } catch(_) {}
+            async function trySendToBase(base){
+                try {
+                    const resp = await fetch(base + '/api/send-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ to }),
+                        mode: 'cors'
+                    });
+                    if (resp.ok) return await resp.json();
+                    const txt = await resp.text().catch(()=>null);
+                    throw new Error(`Status ${resp.status}: ${txt || resp.statusText}`);
+                } catch(e){
+                    throw e;
                 }
-                return null;
             }
 
-            try {
-                const apiBase = await pickApiBase();
-                if (!apiBase) throw new Error('Servidor de e-mail local não está ativo.');
-                const resp = await fetch(apiBase + '/api/send-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ to, subject, html })
-                });
-                if (!resp.ok) throw new Error('Falha ao enviar e-mail');
-                window.open('admin-verify.html?email='+encodeURIComponent(to)+'&code='+encodeURIComponent(otp), '_blank');
+            const candidates = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://127.0.0.1:3001'];
+            let sent = false;
+            let lastErr = null;
+            for (const base of candidates){
+                try {
+                    console.log('[forgotPasswordFlow] tentando enviar para', base);
+                    await trySendToBase(base);
+                    sent = true;
+                    break;
+                } catch(e){
+                    console.warn('[forgotPasswordFlow] falha no base', base, e && e.message ? e.message : e);
+                    lastErr = e;
+                }
+            }
+
+            if (sent) {
+                if (popup && !popup.closed) {
+                    try { popup.location.href = verifyUrl; popup.focus(); } catch(e) { window.open(verifyUrl, '_blank'); }
+                } else {
+                    window.open(verifyUrl, '_blank');
+                }
                 alert('✅ Código enviado por e-mail! A verificação foi aberta em nova aba.');
-            } catch (err) {
-                console.error(err);
-                alert('⚠️ Não foi possível enviar o e-mail agora. Código gerado localmente: ' + otp + '\nAbrindo verificação em nova aba...');
-                window.open('admin-verify.html?email='+encodeURIComponent(to)+'&code='+encodeURIComponent(otp), '_blank');
+                return;
+            }
+
+            console.error('[forgotPasswordFlow] não foi possível enviar por nenhum servidor', lastErr);
+            alert('⚠️ Não foi possível enviar o e-mail agora. Código gerado localmente: ' + otp + '\nAbrindo verificação em nova aba...');
+            if (popup && !popup.closed) {
+                try { popup.location.href = verifyUrl; popup.focus(); } catch(e) { window.open(verifyUrl, '_blank'); }
+            } else {
+                window.open(verifyUrl, '_blank');
             }
         }
 

@@ -148,8 +148,10 @@ function getProductDescription(productId, language) {
         return productTranslations[productId][lang];
     }
     // Fallback to product's default description
-    const product = products.find(p => p.id === productId);
-    return product ? product.description : '';
+    // Procurar também em `window.products` (que contém produtos base + custom adicionados pelo admin)
+    const source = Array.isArray(window.products) ? window.products : (typeof products !== 'undefined' && Array.isArray(products) ? products : []);
+    const product = source.find(p => p && Number(p.id) === Number(productId));
+    return product ? (product.description || '') : '';
 }
 
 // Export for use in other files

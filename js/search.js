@@ -74,9 +74,9 @@ class ProductFilter {
                 }
             }
 
-            // Price filter
-            if (product.price < this.currentFilters.priceMin || 
-                product.price > this.currentFilters.priceMax) {
+            // Price filter: if product has no price, treat as Infinity so it won't match finite ranges
+            const pPrice = (typeof product.price !== 'undefined' && product.price !== null) ? Number(product.price) : Infinity;
+            if (pPrice < this.currentFilters.priceMin || pPrice > this.currentFilters.priceMax) {
                 return false;
             }
 
@@ -100,10 +100,10 @@ class ProductFilter {
 
         switch(sortBy) {
             case 'price-asc':
-                this.filteredProducts.sort((a, b) => a.price - b.price);
+                this.filteredProducts.sort((a, b) => (Number(a.price) || Infinity) - (Number(b.price) || Infinity));
                 break;
             case 'price-desc':
-                this.filteredProducts.sort((a, b) => b.price - a.price);
+                this.filteredProducts.sort((a, b) => (Number(b.price) || Infinity) - (Number(a.price) || Infinity));
                 break;
             case 'rating':
                 this.filteredProducts.sort((a, b) => b.rating - a.rating);
@@ -121,7 +121,8 @@ class ProductFilter {
     // Get unique price range
     getPriceRange() {
         const list = Array.isArray(window.products) ? window.products : this.source;
-        const prices = list.map(p => p.price);
+        const prices = list.map(p => Number(p.price)).filter(v => Number.isFinite(v));
+        if (!prices.length) return { min: 0, max: 0 };
         return {
             min: Math.min(...prices),
             max: Math.max(...prices)
@@ -398,7 +399,7 @@ function renderFilteredProducts() {
                     <span class="rating-count">(${product.reviews})</span>
                 </div>
                 <div class="product-footer">
-                    <span class="product-price">${formatPrice(product.price, currentCurrency)}</span>
+                    ${product._isCustom ? `<span class="product-price">${formatPrice(product.price, currentCurrency)}</span>` : ''}
                     <button class="add-to-cart-btn" onclick="addToCart(${product.id})">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Adicionar</span>

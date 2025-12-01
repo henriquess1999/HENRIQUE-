@@ -24,19 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Section Navigation
 function showSection(sectionId) {
-    // Update nav links
-    document.querySelectorAll('.admin-nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    event.target.closest('.admin-nav-link').classList.add('active');
-    
-    // Update sections
-    document.querySelectorAll('.admin-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    document.getElementById(sectionId + '-section').classList.add('active');
-    
-    // Update title
+    // Atualiza links de navegação (remove active de todos e marca o link correspondente)
+    document.querySelectorAll('.admin-nav-link').forEach(link => link.classList.remove('active'));
+    const navLink = document.querySelector(`.admin-nav-link[href="#${sectionId}"]`);
+    if (navLink) navLink.classList.add('active');
+
+    // Atualiza seções (garante que somente a seção solicitada esteja visível)
+    document.querySelectorAll('.admin-section').forEach(section => section.classList.remove('active'));
+    const targetSection = document.getElementById(sectionId + '-section');
+    if (targetSection) targetSection.classList.add('active');
+
+    // Atualiza título do cabeçalho
     const titles = {
         'dashboard': 'Dashboard',
         'sales': 'Vendas',
@@ -47,13 +45,15 @@ function showSection(sectionId) {
         'financial': 'Financeiro',
         'settings': 'Configurações'
     };
-    document.getElementById('sectionTitle').textContent = titles[sectionId] || sectionId;
+    const titleEl = document.getElementById('sectionTitle');
+    if (titleEl) titleEl.textContent = titles[sectionId] || sectionId;
 }
 
 // Load Dashboard Data
 function loadDashboardData() {
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
     const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const checkoutCustomers = JSON.parse(localStorage.getItem('customers') || '[]');
     
     // Calculate stats
     const today = new Date().toDateString();
@@ -66,7 +66,22 @@ function loadDashboardData() {
     // Update UI
     document.getElementById('todaySales').textContent = formatPrice(todaySales, 'USD');
     document.getElementById('totalOrders').textContent = orders.length;
-    document.getElementById('totalCustomers').textContent = users.length;
+    // Calcular contagem única de clientes combinando usuários legados e clientes do checkout
+    try {
+        const map = new Map();
+        (users || []).forEach(u => {
+            const id = u && u.id != null ? 'LEG-' + u.id : ('LEG-' + Math.random().toString(36).slice(2,8));
+            map.set(id, true);
+        });
+        (checkoutCustomers || []).forEach(c => {
+            const id = c && c.id ? c.id : (c && c.email ? 'CHK-' + c.email : 'CHK-' + Math.random().toString(36).slice(2,8));
+            map.set(id, true);
+        });
+        document.getElementById('totalCustomers').textContent = String(map.size);
+    } catch (e) {
+        // Fallback simples: exibe apenas a quantidade de `users`
+        document.getElementById('totalCustomers').textContent = users.length;
+    }
     updatePendingOrdersBadge(orders);
     
     // Load recent orders
@@ -598,6 +613,99 @@ function loadFinancial() {
     }
 }
 
+// Copy financial summary helpers
+function _getMonthKeyFromDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    return `${y}-${m}`;
+}
+
+function _buildFinancialSummaryForMonth(monthKey) {
+    const consolidated = JSON.parse(localStorage.getItem('financialRecords') || '[]');
+    const rows = consolidated.filter(r => {
+        const d = new Date(r.consolidatedAt || r.sourceCreatedAt);
+        if (isNaN(d)) return false;
+        const key = _getMonthKeyFromDate(d);
+        return key === monthKey;
+    });
+
+    let total = 0;
+    let totalCommission = 0;
+    const details = rows.map(r => {
+        const d = new Date(r.consolidatedAt || r.sourceCreatedAt);
+        const dateStr = isNaN(d) ? '-' : d.toLocaleDateString('pt-BR');
+        const amount = Number(r.amount || 0);
+        const commission = Number(r.commission || 0);
+        total += amount;
+        totalCommission += commission;
+        return { date: dateStr, customer: r.customerName || '-', amount, commission };
+    });
+
+    return { monthKey, total, totalCommission, count: details.length, details };
+}
+
+function _formatFinancialSummaryText(summary) {
+    const [y, m] = summary.monthKey.split('-');
+    const monthLabel = `${m}/${y}`;
+    let text = `Resumo Financeiro — ${monthLabel}\n`;
+    text += `Receita Total: R$ ${formatBRL(summary.total)}\n`;
+    text += `Comissão Total: R$ ${formatBRL(summary.totalCommission)}\n`;
+    text += `Registros consolidados: ${summary.count}\n\n`;
+    if (summary.count > 0) {
+        text += `Detalhes:\n`;
+        summary.details.forEach(d => {
+            text += `- ${d.date} | ${d.customer} | R$ ${formatBRL(d.amount)} | Comissão: R$ ${formatBRL(d.commission)}\n`;
+        });
+    }
+    return text;
+}
+
+async function _copyTextToClipboard(text) {
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+    } catch (e) {
+        // fallback
+    }
+    // fallback for older browsers
+    try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function copyFinancialSummaryCurrentMonth() {
+    const now = new Date();
+    const key = _getMonthKeyFromDate(now);
+    const summary = _buildFinancialSummaryForMonth(key);
+    const text = _formatFinancialSummaryText(summary);
+    _copyTextToClipboard(text).then(ok => {
+        if (ok) alert('Resumo do mês atual copiado para a área de transferência.');
+        else alert('Falha ao copiar o resumo.');
+    });
+}
+
+function copyFinancialSummaryPreviousMonth() {
+    const now = new Date();
+    now.setMonth(now.getMonth() - 1);
+    const key = _getMonthKeyFromDate(now);
+    const summary = _buildFinancialSummaryForMonth(key);
+    const text = _formatFinancialSummaryText(summary);
+    _copyTextToClipboard(text).then(ok => {
+        if (ok) alert('Resumo do mês anterior copiado para a área de transferência.');
+        else alert('Falha ao copiar o resumo.');
+    });
+}
+
 // Helpers de moeda BRL
 function formatBRL(value) {
     const n = Number(value) || 0;
@@ -700,7 +808,14 @@ function saveAdminNewProduct(event) {
     const editingId = editingIdAttr ? Number(editingIdAttr) : null;
 
     const name = form.name.value.trim();
-    const price = parseFloat(form.price.value) || 0;
+    // Normaliza o valor de preço aceitando formatos BRL (1.234,56) ou ponto (1234.56)
+    const priceRaw = (form.price.value || '').toString().trim();
+    let price = 0;
+    if (priceRaw) {
+        const cleaned = priceRaw.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.\-]/g, '');
+        const n = Number(cleaned);
+        price = isNaN(n) ? 0 : n;
+    }
     const image = form.image.value.trim();
     const extraImagesRaw = form.extraImages.value.trim();
     const video = form.video.value.trim();
@@ -720,6 +835,9 @@ function saveAdminNewProduct(event) {
     // Produtos base do site
     const baseProducts = Array.isArray(window.products) ? window.products : [];
     let existingCustom = JSON.parse(localStorage.getItem('customProducts') || '[]');
+    // Normaliza entries existentes: garante flag `_isCustom` e preço numérico
+    if (!Array.isArray(existingCustom)) existingCustom = [];
+    existingCustom = existingCustom.map(ec => ({ ...ec, _isCustom: true, price: ec && ec.price != null ? Number(ec.price) : undefined }));
 
     // Se estiver editando, mantemos o id original; senão, calculamos o próximo id
     const nextId = editingId || (
@@ -735,7 +853,8 @@ function saveAdminNewProduct(event) {
         name,
         price,
         image,
-        images: extraImages,
+        // garante que a imagem principal esteja sempre na primeira posição do array `images`
+        images: Array.from(new Set([image, ...extraImages].filter(Boolean))),
         description,
         category,
         badge: badge || undefined,
@@ -743,6 +862,9 @@ function saveAdminNewProduct(event) {
         rating: 5,
         reviews: 0
     };
+
+    // Marca produto personalizado explicitamente
+    newProduct._isCustom = true;
 
     // Se for edição, substitui; se for novo, adiciona
     if (editingId) {

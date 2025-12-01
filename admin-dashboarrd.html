@@ -52,9 +52,9 @@
         </nav>
 
         <div class="admin-user" data-gender="male">
-            <div class="admin-user-avatar" aria-hidden="true">H</div>
+            <div class="admin-user-avatar" aria-hidden="true">A</div>
             <div class="admin-user-info">
-                <strong>Henrique</strong>
+                <strong>Administrador</strong>
                 <span>Administrador</span>
             </div>
             <button onclick="logout()" title="Sair">
@@ -441,6 +441,10 @@
                     <p style="margin-bottom:1rem; color:var(--gray-600);">
                         Vendas consolidadas automaticamente 6 horas após entrarem na aba Vendas do Dia. Esses valores não podem ser alterados.
                     </p>
+                    <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-bottom:0.75rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="copyFinancialSummaryPreviousMonth()">Copiar resumo mês anterior</button>
+                        <button class="btn btn-primary btn-sm" onclick="copyFinancialSummaryCurrentMonth()">Copiar resumo mês atual</button>
+                    </div>
                     <div class="table-responsive">
                         <table class="admin-table">
                             <thead>
@@ -467,7 +471,7 @@
                             <form id="settingsForm">
                                 <div class="form-group">
                                     <label>E-mail administrativo</label>
-                                    <input type="text" id="adminEmailDisplay" readonly value="E2Wrepresentações@gmail.com.br" style="background:#0b0b0b; color:var(--gray-800); border:1px solid rgba(191,161,74,0.16); padding:0.6rem; border-radius:6px; width:100%;">
+                                    <input type="text" id="adminEmailDisplay" readonly value="henriquess1999@gmail.com" style="background:#0b0b0b; color:var(--gray-800); border:1px solid rgba(191,161,74,0.16); padding:0.6rem; border-radius:6px; width:100%;">
                                     <small style="color:var(--gray-600);">O e-mail é mostrado para referência. Para alterar o e-mail administrativo atualmente é necessário editar o arquivo de configuração do projeto.</small>
                                 </div>
                                 <div style="margin-top:0.5rem;">

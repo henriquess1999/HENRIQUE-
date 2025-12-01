@@ -385,8 +385,8 @@
    Configurações / Admin (UI)
    ============================ */
 
-/* Layout em duas colunas para a aba de configurações */
-#settings-section {
+/* Layout em duas colunas para a aba de configurações — aplicar somente quando a seção estiver ativa */
+.admin-section.active#settings-section {
     display: grid;
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     gap: 1.5rem;
@@ -394,7 +394,7 @@
 }
 
 @media (max-width: 1024px) {
-    #settings-section {
+    .admin-section.active#settings-section {
         grid-template-columns: 1fr;
     }
 }
