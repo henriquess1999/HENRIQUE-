@@ -1,3 +1,24 @@
+# E2W Representações — Loja (htms)
+
+Projeto de frontend simples + pequena API para envio de e-mails e notificações.
+
+Principais pontos:
+- Frontend: arquivos HTML/CSS/JS em raiz e `js/`.
+- Admin: painel em `admin-dashboarrd.html` com lógica em `js/admin.js`.
+- Envio de e-mails: `emailService.js` com suporte Resend + fallback SMTP.
+- Endpoint serverless: `api/order-complete.js` pronta para Vercel.
+
+Deploy recomendado (Vercel):
+1. Conectar este repositório no Vercel.
+2. Configurar variáveis de ambiente: `ADMIN_EMAIL`, `EMAIL_FROM`, `RESEND_API_KEY` (opcional), `SMTP_*` (opcional).
+3. Fazer deploy. O arquivo `vercel.json` já contém regras básicas de headers.
+
+Como contribuir / fluxo rápido:
+1. Criar uma branch a partir de `main`.
+2. Fazer mudanças, commitar e push.
+3. Abrir Pull Request para `main`.
+
+Contato: e2wrepresentacoes@gmail.com
 # CellShop - Loja Online Premium de Eletrônicos
 
 Uma loja online profissional e moderna para venda de eletrônicos premium com recursos avançados de e-commerce.
