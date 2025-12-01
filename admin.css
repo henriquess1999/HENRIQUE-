@@ -581,8 +581,8 @@
 }
 
 .product-image-small {
-    width: 70px;
-    height: 70px;
+    width: 90px;
+    height: 90px;
     object-fit: cover;
     border-radius: var(--radius-md);
 }
