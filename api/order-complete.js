@@ -1,4 +1,6 @@
 const { enviarEmail } = require('../emailService');
+const https = require('https');
+const { URL } = require('url');
 
 // Vercel Serverless handler
 module.exports = async (req, res) => {
@@ -57,6 +59,27 @@ module.exports = async (req, res) => {
         console.warn('[api/order-complete] warning: failed to send customer email', err && err.message);
       }
     }
+
+    // Optional: forward order to a central storage endpoint if configured
+    // Useful when this function runs on serverless (Vercel) and there's a persistent server
+    try {
+      const storageEndpoint = process.env.STORAGE_ENDPOINT || process.env.STORAGE_URL || null;
+      if (storageEndpoint) {
+        try {
+          const target = new URL(storageEndpoint.replace(/\/$/, '') + '/api/order-complete');
+          const payload = JSON.stringify({ order });
+          const opts = { hostname: target.hostname, path: target.pathname, method: 'POST', port: target.port || 443, headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } };
+          const reqForward = https.request(opts, fRes => {
+            let chunks = '';
+            fRes.on('data', d=> chunks += d);
+            fRes.on('end', ()=> console.log('[api/order-complete] forwarded order to storage endpoint', fRes.statusCode));
+          });
+          reqForward.on('error', e => console.warn('[api/order-complete] forward error', e && e.message ? e.message : e));
+          reqForward.write(payload);
+          reqForward.end();
+        } catch (eF) { console.warn('[api/order-complete] failed to forward order', eF && eF.message ? eF.message : eF); }
+      }
+    } catch (e) { /* ignore */ }
 
     res.statusCode = 200;
     res.end(JSON.stringify({ ok: true }));

@@ -34,11 +34,11 @@
                 <span style="display:none;" id="header-brand-text">E2W REPRESENTAÇÕES</span>
                 <span id="header-subtitle" style="display:none;font-size:1.2rem;color:#bfa14a;text-align:center;margin-top:0.5rem;">Equipamentos Industriais & Construção Civil</span>
             <!-- Botões de ação (Admin + Carrinho) -->
-            <button class="admin-btn" id="adminBtn" title="Administrador" onclick="location.href='admin.login.html'" style="position:absolute;top:0.5rem;right:4.3rem;background:rgba(34,34,34,0.92);border:none;border-radius:50%;padding:0.7rem 0.9rem;box-shadow:0 2px 12px #0006;cursor:pointer;z-index:10;border:2px solid #bfa14a;">
+            <button class="admin-btn" id="adminBtn" title="Administrador" onclick="location.href='admin.login.html'" style="position:absolute;top:0.5rem;right:4.3rem;background:rgba(34,34,34,0.92);border:none;box-shadow:0 2px 12px #0006;cursor:pointer;z-index:10;border:2px solid #bfa14a;">
                 <i class="fas fa-user-shield" style="font-size:1.35rem;color:#bfa14a;"></i>
             </button>
             <!-- Botão do carrinho -->
-            <button class="cart-btn" id="cartBtn" style="position:absolute;top:0.5rem;right:0.5rem;background:rgba(34,34,34,0.92);border:none;border-radius:50%;padding:0.7rem 0.9rem;box-shadow:0 2px 12px #0006;cursor:pointer;z-index:10;">
+            <button class="cart-btn" id="cartBtn" style="position:absolute;top:0.5rem;right:0.5rem;background:rgba(34,34,34,0.92);border:none;box-shadow:0 2px 12px #0006;cursor:pointer;z-index:10;">
                 <i class="fas fa-shopping-cart" style="font-size:1.5rem;color:#bfa14a;"></i>
                 <span class="cart-count" id="cartCount" style="position:absolute;top:0.2rem;right:0.2rem;background:#bfa14a;color:#181818;font-size:0.95rem;font-weight:700;border-radius:50%;padding:0.1rem 0.5rem;min-width:1.5rem;text-align:center;">0</span>
             </button>
@@ -46,11 +46,11 @@
     </header>
 
     <!-- Banner institucional centralizado -->
-    <section id="home" style="background:#111111;min-height:180px;display:flex;align-items:center;justify-content:center;">
+    <section id="home" style="background:#111111;min-height:110px;display:flex;align-items:center;justify-content:center;padding:0.6rem 0;">
         <div style="text-align:center;width:100%;max-width:700px;margin:auto;">
-            <h1 style="font-size:2rem;font-weight:900;color:#bfa14a;letter-spacing:1.5px;">Soluções para Construção Civil e Indústria</h1>
-            <p style="color:#e2c97a;font-size:1rem;margin:1rem 0 1.4rem 0;">Bitoneira, Andaime, Ferramentas, Geradores, Hidráulica, Empilhadeira e muito mais para sua obra ou empresa.</p>
-            <a href="#produtos-industriais" class="btn btn-primary btn-lg" style="font-size:1.2rem;padding:1rem 2.5rem;">Ver Produtos</a>
+            <h1 style="font-size:1.4rem;font-weight:900;color:#bfa14a;letter-spacing:1.2px;margin-bottom:0.4rem;">Soluções para Construção Civil e Indústria</h1>
+            <p style="color:#e2c97a;font-size:0.92rem;margin:0.2rem 0 0.6rem 0;">Bitoneira, Andaime, Ferramentas, Geradores, Hidráulica, Empilhadeira e muito mais para sua obra ou empresa.</p>
+            <a href="#produtos-industriais" class="btn btn-primary btn-lg" style="font-size:1rem;padding:0.6rem 1.6rem;">Ver Produtos</a>
         </div>
     </section>
     <!-- Hero Section with Video/Slider -->
@@ -59,6 +59,10 @@
             <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: center; justify-content: center; margin-top: 2.5rem; margin-bottom: 2.5rem; width: 100%;">
                 <a href="#produtos-anmax" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('all'); location.hash='produtos-anmax';" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
                     <img src="https://anmax.com.br/wp-content/uploads/2024/09/logo-anmax.png" alt="Logo Anmax" style="max-width: 260px; min-width: 120px; filter: contrast(1.18) brightness(1.13) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
+                </a>
+                <!-- Novo botão ao lado do Anmax (Sorrag) -->
+                <a id="hero-sorrag-btn" href="#produtos-sorrag" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('sorrag'); setTimeout(function(){ var el = document.getElementById('produtos-sorrag'); if(el) el.scrollIntoView({behavior:'smooth', block: 'start'}); else location.hash='produtos-sorrag'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.2rem 2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2px solid #bfa14a;">
+                    <img src="https://www.sorrag.com.br/wp-content/uploads/2024/07/logo-branca-1.png" alt="Logo Sorrag" style="max-width:160px;min-width:80px;width:auto;filter:contrast(1.05) brightness(1.05) saturate(1.05) drop-shadow(0 4px 24px #000a); background:transparent;">
                 </a>
                 <a id="hero-cr-btn" href="#produtos-crn" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('brasilcr'); setTimeout(function(){ var el = document.getElementById('cr-novos') || document.getElementById('produtos-crn'); if(el) el.scrollIntoView({behavior:'smooth', block: 'start'}); else location.hash='produtos-crn'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
                     <img src="https://cdn.dooca.store/929/files/logo-cr-n-1.png" alt="Logo CRN" style="max-width: 260px; min-width: 120px; filter: contrast(1.18) brightness(1.13) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
@@ -264,14 +268,14 @@
                         </div>
                         <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(404)">
                             <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
-                                <img src="https://www.htmaquinasbrasil.com.br/wp-content/uploads/2024/06/Electric_Reach_Truck_1.6-2_Tonne_CQD16-20.jpg" alt="Empilhadeira UP-CQD20-D-12M" style="width:260px;height:180px;object-fit:contain;">
+                                <img src="https://images.tcdn.com.br/img/img_prod/1424675/90_empilhadeira_eltrica_patolada_1_20250829111703_57bec40866ab.png" alt="Empilhadeira UP-CQD20-D-12M" style="width:260px;height:180px;object-fit:contain;">
                                 <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Empilhadeira Elétrica Embarcada 2,0ton – UP-CQD20-D-12M</h5>
                                 <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(404);">Ver produto</button>
                             </div>
                         </div>
                         <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(405)">
                             <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
-                                <img src="https://www.htmaquinasbrasil.com.br/wp-content/uploads/2024/06/Electric_Reach_Truck_1.6-2_Tonne_CQD16-20.jpg" alt="Empilhadeira UP-CQD25-D-12,5M" style="width:260px;height:180px;object-fit:contain;">
+                                <img src="https://images.tcdn.com.br/img/img_prod/1424675/90_empilhadeira_eltrica_patolada_1_20250829111703_57bec40866ab.png" alt="Empilhadeira UP-CQD25-D-12,5M" style="width:260px;height:180px;object-fit:contain;">
                                 <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Empilhadeira Retrátil 2,5TON 12,5M UP-CQD25-D-12,5M</h5>
                                 <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(405);">Ver produto</button>
                             </div>
@@ -290,27 +294,8 @@
                                 <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(407);">Ver produto</button>
                             </div>
                         </div>
-                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(408)">
-                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
-                                <img src="https://tse1.mm.bing.net/th/id/OIP.wfE8XaBYJDcMUOsDOCEtKAHaHa?pid=Api&P=0&h=180" alt="Andaime Tubular 1M X 1,5M" style="width:260px;height:180px;object-fit:contain;">
-                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Andaime Tubular 1M X 1,5M</h5>
-                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(408);">Ver produto</button>
-                            </div>
-                        </div>
-                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(409)">
-                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
-                                <img src="https://tse2.mm.bing.net/th/id/OIP.jC76BKgtQxH4lBL3wdjxAwHaHa?pid=Api&P=0&h=180" alt="Piso Galvanizado para Andaime 037×1,5m – UP152.3" style="width:260px;height:180px;object-fit:contain;">
-                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Piso Galvanizado para Andaime 037×1,5m – UP152.3</h5>
-                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(409);">Ver produto</button>
-                            </div>
-                        </div>
-                        <div class="product-card up-new-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(418)">
-                            <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
-                                <img src="https://www.newmaqlocadora.com.br/wp-content/uploads/2023/09/guarda_corpo.jpg" alt="CONJUNTO GUARDA CORPO 1,5M COM PORTA UP153.1" style="width:260px;height:180px;object-fit:contain;">
-                                <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">CONJUNTO GUARDA CORPO 1,5M COM PORTA UP153.1</h5>
-                                <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(418);">Ver produto</button>
-                            </div>
-                        </div>
+                        
+                        
                     </div>
                 </div>
             </div>
@@ -369,6 +354,46 @@
                             <img src="https://flachequipamentos.com.br/wp-content/uploads/F60-1.jpg" alt="Carregador Inteligente de Bateria F60 RNEW" style="width:260px;height:180px;object-fit:contain;">
                             <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">Carregador Inteligente de Bateria F30 RNEW</h5>
                             <button type="button" class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(441);">Ver produto</button>
+                        </div>
+                    </div>
+                    <!-- Divisor preto com título colocado logo abaixo deste produto -->
+                    <div class="gold-divider">
+                        <h2 class="products-standard-title">Nossos Produtos</h2>
+                        <div style="display:flex;justify-content:center;margin-top:0.6rem;">
+                            <img src="https://www.sorrag.com.br/wp-content/uploads/2024/07/logo-branca-1.png" alt="Sorrag" style="max-width:220px;width:100%;height:auto;filter:contrast(1.05) saturate(1.05);">
+                        </div>
+                        <!-- Cards Sorrag: Betoneira Profissional 400L + Betoneira Power 400L (lado a lado) -->
+                        <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;flex-wrap:wrap;">
+                            <div class="product-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(501)">
+                                <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                    <img src="https://www.sorrag.com.br/wp-content/uploads/2024/10/betoneira-profissional-400litros-chave-sorrag-150x150.jpg" alt="Betoneira Profissional 400L" style="width:220px;height:160px;object-fit:contain;">
+                                    <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;">Betoneira Profissional 400L</h5>
+                                    <button class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(501);">Ver produto</button>
+                                </div>
+                            </div>
+
+                            <div class="product-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(502)">
+                                <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                    <img src="https://www.sorrag.com.br/wp-content/uploads/2024/10/betoneira-power-400-1-150x150.jpg" alt="Betoneira Power 400L" style="width:220px;height:160px;object-fit:contain;">
+                                    <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;">Betoneira Power 400L</h5>
+                                    <button class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(502);">Ver produto</button>
+                                </div>
+                            </div>
+
+                            <div class="product-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(503)">
+                                <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                    <img src="https://www.sorrag.com.br/wp-content/uploads/2024/10/betoneira-profissional-400litros-gasolina-sorrag-150x150.jpg" alt="Betoneira Gasolina 400L" style="width:220px;height:160px;object-fit:contain;">
+                                    <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;">Betoneira Gasolina 400L</h5>
+                                    <button class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(503);">Ver produto</button>
+                                </div>
+                            </div>
+                            <div class="product-card" style="max-width:360px;width:100%;cursor:pointer;" onclick="showProductModal(504)">
+                                <div style="padding:0.9rem;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;align-items:center;gap:0.9rem;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+                                    <img src="assets/images/betoneira-star-400.jpg" alt="Betoneira Star 400L" style="width:220px;height:160px;object-fit:contain;">
+                                    <h5 style="font-size:1rem;margin:0;color:#181818;font-weight:700;text-align:center;line-height:1.1;min-height:3.3rem;">Betoneira Star 400L</h5>
+                                    <button class="btn btn-primary" style="margin-top:0.6rem;padding:0.6rem 1rem;width:140px;text-transform:none;" onclick="event.stopPropagation();showProductModal(504);">Ver produto</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

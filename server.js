@@ -2,6 +2,8 @@
 try { require('dotenv').config(); } catch(e) {}
 const http = require('http');
 const url = require('url');
+const fs = require('fs');
+const path = require('path');
 const { enviarEmail } = require('./emailService');
 
 // OTP em memória (desaparecerá ao reiniciar o servidor)
@@ -45,6 +47,19 @@ const server = http.createServer(async (req, res)=>{
 
   if (req.method === 'GET' && parsed.pathname === '/api/health'){
     return sendJson(res, 200, { status: 'ok' });
+  }
+
+  // Retorna lista de pedidos salvos localmente
+  if (req.method === 'GET' && parsed.pathname === '/api/orders'){
+    try {
+      const ordersFile = path.join(__dirname, 'data', 'orders.json');
+      let existing = [];
+      try { existing = JSON.parse(fs.readFileSync(ordersFile, 'utf8') || '[]'); } catch (e) { existing = []; }
+      return sendJson(res, 200, { ok: true, orders: existing });
+    } catch (e) {
+      console.error('[api/orders] error reading orders file', e && (e.stack||e));
+      return sendJson(res, 500, { ok: false, error: 'failed_to_read_orders' });
+    }
   }
 
   if (req.method === 'POST' && parsed.pathname === '/api/send-email'){
@@ -179,6 +194,23 @@ const server = http.createServer(async (req, res)=>{
       `;
 
       try{
+        // grava o pedido em storage local (arquivo JSON)
+        try {
+          const dataDir = path.join(__dirname, 'data');
+          if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+          const ordersFile = path.join(dataDir, 'orders.json');
+          let existing = [];
+          try { existing = JSON.parse(fs.readFileSync(ordersFile, 'utf8') || '[]'); } catch (e) { existing = []; }
+          // evita duplicar pedido com mesmo id
+          existing = existing.filter(o => String(o.id) !== String(order.id));
+          existing.unshift(order);
+          // mantém histórico até 200 pedidos
+          existing = existing.slice(0, 200);
+          fs.writeFileSync(ordersFile, JSON.stringify(existing, null, 2), 'utf8');
+        } catch (eSave) {
+          console.warn('[order-complete] warning: falha ao salvar pedido localmente', eSave && eSave.message ? eSave.message : eSave);
+        }
+
         const resultAdmin = await enviarEmail(adminEmail, `Novo pedido ${order.id}`, html);
         console.log('[order-complete] email sent to admin', order.id, resultAdmin && resultAdmin.id ? resultAdmin.id : resultAdmin);
 

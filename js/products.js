@@ -193,6 +193,66 @@ const products = [
         reviews: 0,
         badge: "Novo"
     },
+    {
+        id: 501,
+        name: "Betoneira Profissional 400L",
+        category: "sorrag",
+        price: 0.00,
+        image: "https://www.sorrag.com.br/wp-content/uploads/2024/10/betoneira-profissional-400litros-chave-sorrag-150x150.jpg",
+        images: [
+            "https://www.sorrag.com.br/wp-content/uploads/2024/10/betoneira-profissional-400litros-chave-sorrag-150x150.jpg",
+            "https://www.sorrag.com.br/wp-content/uploads/2024/10/batoneira-sorrag-PROFISSIONAL-400L-CHAVE-150x150.jpg",
+            "https://www.sorrag.com.br/wp-content/uploads/2024/10/betoneira-profissional-400-litros-150x150.jpg"
+        ],
+        description: "Capacidade do Tambor: 400L\n\nCapacidade da Mistura: 300L\n\nQuantidade de Ciclos/Hora: 15 a 20\n\nProdução Estimada/Hora: 4,65m²\n\nRotação do Tambor: 27RPM\n\nPeso sem Motor: 171KG\n\nPeso com Motor: 189KG\n\nPotência do Motor: 2 CV",
+        rating: 4.5,
+        reviews: 0,
+        badge: "Novo"
+    },
+    {
+        id: 502,
+        name: "Betoneira Power 400L",
+        category: "sorrag",
+        price: 0.00,
+        image: "https://www.sorrag.com.br/wp-content/uploads/2024/10/betoneira-power-400-1-150x150.jpg",
+        images: [
+            "https://www.sorrag.com.br/wp-content/uploads/2024/10/betoneira-power-400-1-150x150.jpg",
+            "https://www.sorrag.com.br/wp-content/uploads/2024/10/motor-betoneira-power-400litros-sorrag-150x150.jpg"
+        ],
+        description: "Capacidade do Tambor: 400L\n\nCapacidade da Mistura: 300L\n\nQuantidade de Ciclos/Hora: 15 a 20\n\nProdução Estimada/Hora: 4,65m²\n\nRotação do Tambor: 27RPM\n\nPeso sem Motor: 141KG\n\nPeso com Motor: 159KG\n\nPotência do Motor: 2 CV",
+        rating: 4.4,
+        reviews: 0,
+        badge: "Novo"
+    },
+    {
+        id: 503,
+        name: "Betoneira Gasolina 400L",
+        category: "sorrag",
+        price: 0.00,
+        image: "https://www.sorrag.com.br/wp-content/uploads/2024/10/betoneira-profissional-400litros-gasolina-sorrag-150x150.jpg",
+        images: [
+            "https://www.sorrag.com.br/wp-content/uploads/2024/10/betoneira-profissional-400litros-gasolina-sorrag-150x150.jpg",
+            "https://www.sorrag.com.br/wp-content/uploads/2024/10/motor-betoneira-gasolina-400litros-sorrag-150x150.jpg"
+        ],
+        description: "Capacidade do Tambor: 400L\n\n(Especificações detalhadas pendentes. Informe se quiser que eu adicione medidas/peso/potência.)",
+        rating: 4.0,
+        reviews: 0,
+        badge: "Novo"
+    },
+    {
+        id: 504,
+        name: "Betoneira Star 400L",
+        category: "sorrag",
+        price: 0.00,
+        image: "assets/images/betoneira-star-400.jpg",
+        images: [
+            "assets/images/betoneira-star-400.jpg"
+        ],
+        description: "Betoneira Star 400L — robusta para obras. (Envie especificações se desejar detalhar.)",
+        rating: 4.3,
+        reviews: 0,
+        badge: "Novo"
+    },
                         {
                             id: 101,
                             name: "Alisadora de Concreto",
@@ -765,8 +825,10 @@ const products = [
         name: "Empilhadeira Elétrica Embarcada 2,0ton – UP-CQD20-D-12M",
         category: "up",
         price: 0.00,
-        image: "https://www.htmaquinasbrasil.com.br/wp-content/uploads/2024/06/Electric_Reach_Truck_1.6-2_Tonne_CQD16-20.jpg",
+        image: "https://images.tcdn.com.br/img/img_prod/1424675/90_empilhadeira_eltrica_patolada_1_20250829111703_57bec40866ab.png",
         images: [
+            "https://images.tcdn.com.br/img/img_prod/1424675/90_empilhadeira_eltrica_patolada_1_20250829111703_57bec40866ab.png",
+            "https://images.tcdn.com.br/img/img_prod/1424675/90_emmpilhadeira_eltrica_patolada_1_20250829105414_09c0c57e9d04.png",
             "https://www.htmaquinasbrasil.com.br/wp-content/uploads/2024/06/Electric_Reach_Truck_1.6-2_Tonne_CQD16-20.jpg"
         ],
         description: "A UP-CQD20-D-12M é uma empilhadeira elétrica embarcada, com capacidade nominal de 2000 kg e centro de carga de 600 mm, ideal para operações em armazéns e centros logísticos de alta demanda. Equipada com sistema de direção elétrica e assento almofadado, oferece conforto e precisão durante o uso.",
@@ -782,8 +844,9 @@ const products = [
         name: "Empilhadeira Retrátil 2,5TON 12,5M UP-CQD25-D-12,5M",
         category: "up",
         price: 0.00,
-        image: "https://www.htmaquinasbrasil.com.br/wp-content/uploads/2024/06/Electric_Reach_Truck_1.6-2_Tonne_CQD16-20.jpg",
+        image: "https://images.tcdn.com.br/img/img_prod/1424675/90_empilhadeira_eltrica_patolada_1_20250829111703_57bec40866ab.png",
         images: [
+            "https://images.tcdn.com.br/img/img_prod/1424675/90_empilhadeira_eltrica_patolada_1_20250829111703_57bec40866ab.png",
             "https://www.htmaquinasbrasil.com.br/wp-content/uploads/2024/06/Electric_Reach_Truck_1.6-2_Tonne_CQD16-20.jpg"
         ],
         description: "SOB ENCOMENDA\n\nA UP-CQD25-D-12,5M é uma empilhadeira retrátil elétrica embarcada, desenvolvida para operações intensivas e de grande capacidade. Com capacidade nominal de 2500 kg e centro de carga de 600 mm, oferece alto desempenho em elevação, movimentação e empilhamento de cargas pesadas em espaços industriais e logísticos.\n\nEquipada com sistema de direção elétrica e assento almofadado, garante conforto e precisão ao operador. Seu mastro permite elevação máxima de até 12.500 mm, e o sistema de inclinação de 3° para frente e 4° para trás assegura estabilidade durante o manuseio da carga.\n\nCom peso total de 5830 kg, raio de giro de 1920 mm e largura total de 2100 mm, combina robustez com boa manobrabilidade. A empilhadeira alcança velocidade de deslocamento de até 11 km/h e possui freio eletromagnético, garantindo segurança e controle em rampas de até 12% de inclinação.\n\nSeu conjunto motriz inclui um motor de tração de 15 kW e motor de elevação de 17 kW, ambos elétricos de alto rendimento. A bateria de 80 V / até 775 Ah, com carregador de 200A, proporciona longa autonomia e recarga eficiente, ideal para turnos prolongados.\n\nA UP-CQD25-D-12,5M é a solução ideal para quem busca força, estabilidade e eficiência energética em empilhadeiras retráteis de grande porte.\n\nSOB ENCOMENDA",
@@ -829,57 +892,9 @@ const products = [
         badge: "Novo",
         disableVariants: true
     },
-    // Novo produto: Andaime Tubular (ao lado do ELEVUS 8)
-    {
-        id: 408,
-        name: "Andaime Tubular 1M X 1,5M",
-        category: "up",
-        price: 0.00,
-        image: "https://tse1.mm.bing.net/th/id/OIP.wfE8XaBYJDcMUOsDOCEtKAHaHa?pid=Api&P=0&h=180",
-        images: [
-            "https://tse1.mm.bing.net/th/id/OIP.wfE8XaBYJDcMUOsDOCEtKAHaHa?pid=Api&P=0&h=180"
-        ],
-        description: "Andaime Tubular\nOs andaimes, estrutura montada, de maneira provisória, para sustentar os trabalhadores na execução de serviços – são muito utilizados na construção civil para a execução de serviços no alto, como pintura, colocação de gessos e outros tipos de acabamento.\n\nÉ por meio do andaime que os operários conseguem trabalhar em toda a extensão da obra, garantindo maior eficiência no canteiro de obras.\n\nEletrosoldado por processos MIG, o que proporciona menos distorção nas peças e mais velocidade durante a soldagem;\n\nAcabamento superior de altíssima resistência, possibilitando maior vida útil para o equipamento.",
-        specs: "<ul style='margin:0.6rem 0 0 1rem;line-height:1.45;color:#222;list-style:disc;padding-left:1rem;'>\n<li><strong>Tipo:</strong> Andaime Tubular</li>\n<li><strong>Processo de soldagem:</strong> Eletrosoldado (MIG)</li>\n<li><strong>Acabamento:</strong> Alta resistência</li>\n<li><strong>Aplicação:</strong> Pintura, gesso, acabamentos em obras</li>\n<li><strong>Observações:</strong> Estrutura provisória para trabalho em altura</li>\n</ul>",
-        rating: 4.4,
-        reviews: 0,
-        badge: "Novo",
-        disableVariants: true
-    },
-    // Novo produto: Piso Galvanizado para Andaime 037×1,5m – UP152.3
-    {
-        id: 409,
-        name: "Piso Galvanizado para Andaime 037×1,5m – UP152.3",
-        category: "up",
-        price: 0.00,
-        image: "https://tse2.mm.bing.net/th/id/OIP.jC76BKgtQxH4lBL3wdjxAwHaHa?pid=Api&P=0&h=180",
-        images: [
-            "https://tse2.mm.bing.net/th/id/OIP.jC76BKgtQxH4lBL3wdjxAwHaHa?pid=Api&P=0&h=180"
-        ],
-        description: "Piso galvanizado para andaime 037×1,5m galvanizado com trava de segurança e dois reforços na parte inferior para garantir mais facilidade no manuseio.\n\nComprimento total com as abas: 1,58m\nComprimento da prancha: 1,48m\nLargura: 37cm\nAltura: 4cm\nEspessura: 1,5m",
-        specs: "<ul style='margin:0.6rem 0 0 1rem;line-height:1.45;color:#222;list-style:disc;padding-left:1rem;'>\n<li><strong>Modelo:</strong> UP152.3</li>\n<li><strong>Comprimento total com abas:</strong> 1,58 m</li>\n<li><strong>Comprimento da prancha:</strong> 1,48 m</li>\n<li><strong>Largura:</strong> 37 cm</li>\n<li><strong>Altura:</strong> 4 cm</li>\n<li><strong>Espessura:</strong> 1,5 mm</li>\n<li><strong>Acabamento:</strong> Galvanizado com trava de segurança e reforços inferiores</li>\n</ul>",
-        rating: 4.4,
-        reviews: 0,
-        badge: "Novo",
-        disableVariants: true
-    },
-    // Novo produto: CONJUNTO GUARDA CORPO 1,5M COM PORTA UP153.1
-    {
-        id: 418,
-        name: "CONJUNTO GUARDA CORPO 1,5M COM PORTA UP153.1",
-        category: "up",
-        price: 0.00,
-        image: "https://www.newmaqlocadora.com.br/wp-content/uploads/2023/09/guarda_corpo.jpg",
-        images: [
-            "https://www.newmaqlocadora.com.br/wp-content/uploads/2023/09/guarda_corpo.jpg"
-        ],
-        description: "Painel Guarda Corpo de 1,5m com porta para andaime.",
-        specs: "<ul style='margin:0.6rem 0 0 1rem;line-height:1.45;color:#222;list-style:disc;padding-left:1rem;'>\n<li><strong>Modelo:</strong> UP153.1</li>\n<li><strong>Comprimento:</strong> 1,5 m</li>\n<li><strong>Uso:</strong> Guarda-corpo de andaime com porta</li>\n<li><strong>Acabamento:</strong> Tratamento anticorrosivo (quando aplicável)</li>\n</ul>",
-        rating: 4.5,
-        reviews: 0,
-        badge: "Novo",
-        disableVariants: true
-    },
+    
+    
+    
     // Opções/variantes vendáveis para a paleteira (referenciadas pelo produto 406)
     {
         id: 410,
@@ -1499,7 +1514,7 @@ function loadProducts(category = 'all') {
         // 'all' deve mostrar apenas os produtos da área ANMAX (ex.: 'construcao' etc.)
         // Filtragem defensiva: excluir categorias parceiras e qualquer produto cujo nome
         // contenha 'flach' (protege contra produtos mal categorizados)
-        const partnerCats = ['brasilcr', 'up', 'flach'];
+        const partnerCats = ['brasilcr', 'up', 'flach', 'sorrag'];
         list = source.filter(p => {
             if (!p) return false;
             if (partnerCats.includes(p.category)) return false;
@@ -1629,7 +1644,7 @@ window.showProductModal = function showProductModal(productId) {
     // Para outros produtos especiais, restaurar bloco extra
     if (images.length > 1) {
         thumbs += `<div style="display:grid;grid-template-columns:repeat(${Math.min(images.length,5)},1fr);gap:0.6rem;">`;
-        images.forEach((im, i) => thumbs += `<img src="${im}" class="gallery-thumb" data-image="${im}" alt="Imagem ${i+1}" style="width:100%;height:110px;object-fit:cover;object-position:center center;border-radius:8px;cursor:pointer;border:2.5px solid ${i===0? 'var(--primary)':'transparent'};image-rendering:crisp-edges;filter:contrast(1.08) saturate(1.12);">`);
+        images.forEach((im, i) => thumbs += `<img src="${im}" onerror="this.style.display='none'" class="gallery-thumb" data-image="${im}" alt="Imagem ${i+1}" style="width:100%;height:110px;object-fit:cover;object-position:center center;border-radius:8px;cursor:pointer;border:2.5px solid ${i===0? 'var(--primary)':'transparent'};image-rendering:crisp-edges;filter:contrast(1.08) saturate(1.12);">`);
         thumbs += `</div>`;
     }
 
@@ -1712,7 +1727,7 @@ window.showProductModal = function showProductModal(productId) {
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem;">
                         <div style="position:relative;">
                             <div id="mainMediaContainer" style="width:100%;height:480px;display:flex;align-items:center;justify-content:center;border:1px solid #e5e7eb;border-radius:12px;background:#f9fafb;padding:1rem;position:relative;">
-                                <img id="mainImage" src="${images[0]}" alt="${product.name}" style="max-width:100%;max-height:100%;object-fit:contain;">
+                                <img id="mainImage" src="${images[0]}" onerror="this.style.display='none'" alt="${product.name}" style="max-width:100%;max-height:100%;object-fit:contain;">
                             </div>
                             ${isCortadora ? `<div style='margin-top:1.5rem;display:flex;justify-content:center;'><img src='https://anmax.com.br/wp-content/uploads/2024/09/x3.png' alt='Cortadoras de piso' style='max-width:90%;border-radius:10px;box-shadow:0 4px 24px #0002;' class='zoomable-extra'></div>` : ''}
                             ${isBomba ? `<div style='margin-top:1.5rem;display:flex;justify-content:center;'><img src='https://anmax.com.br/wp-content/uploads/2024/09/rrrrr.png' alt='Bomba Submersível de mangote' style='max-width:90%;border-radius:10px;box-shadow:0 4px 24px #0002;' class='zoomable-extra'></div>` : ''}

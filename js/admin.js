@@ -3,13 +3,16 @@
 // ============================================
 
 // Check admin authentication
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const adminSession = JSON.parse(localStorage.getItem('adminSession'));
     
     if (!adminSession) {
         window.location.href = 'admin.login.html';
         return;
     }
+
+    // tenta sincronizar pedidos remotos com localStorage (se o servidor fornecer /api/orders)
+    try { await syncRemoteOrders(); } catch (e) { /* falha não é crítica, continua com localStorage */ }
     
     // Load dashboard data
     loadDashboardData();
@@ -21,6 +24,50 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSales();
     loadFinancial();
 });
+
+// Busca pedidos no endpoint central `/api/orders` e atualiza localStorage
+async function syncRemoteOrders(){
+    try{
+        let resp;
+        let data = null;
+        try {
+            resp = await fetch('/api/orders', { method: 'GET', credentials: 'same-origin' });
+            if (resp && resp.ok) data = await resp.json();
+        } catch (e) {
+            // fallback: tentaremos usar config.json.storageEndpoint
+            data = null;
+        }
+
+        if ((!data || !data.orders) || !Array.isArray(data.orders) || !data.orders.length) {
+            // tenta ler config.json para um endpoint remoto
+            try {
+                const cfgResp = await fetch('/config.json', { cache: 'no-store' });
+                if (cfgResp && cfgResp.ok) {
+                    const cfg = await cfgResp.json();
+                    if (cfg && cfg.storageEndpoint) {
+                        const remoteUrl = cfg.storageEndpoint.replace(/\/$/, '') + '/api/orders';
+                        const r2 = await fetch(remoteUrl, { method: 'GET' });
+                        if (r2 && r2.ok) data = await r2.json();
+                    }
+                }
+            } catch (e) {
+                // não crítico
+            }
+        }
+
+        if (!data) throw new Error('no_remote_orders');
+        if (data && Array.isArray(data.orders) && data.orders.length){
+            // grava no localStorage para o painel usar
+            localStorage.setItem('orders', JSON.stringify(data.orders));
+            // extrai customers rápidos
+            const customers = (data.orders.map(o => (o.customer || {}))).filter(Boolean).map((c, idx) => ({ id: c.id || ('remote-' + (c.email||c.name||idx)), name: c.name || c.email || '', email: c.email || '', createdAt: c.createdAt || new Date().toISOString() }));
+            if (customers.length) localStorage.setItem('customers', JSON.stringify(customers));
+        }
+    }catch(err){
+        console.warn('[syncRemoteOrders] não foi possível sincronizar pedidos remotos', err && err.message ? err.message : err);
+        throw err;
+    }
+}
 
 // Section Navigation
 function showSection(sectionId) {
