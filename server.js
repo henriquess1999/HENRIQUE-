@@ -6,6 +6,20 @@ const fs = require('fs');
 const path = require('path');
 const { enviarEmail } = require('./emailService');
 
+// Firestore (opcional - ativar definindo FIRESTORE_ENABLED=1 e credenciais)
+let firestoreClient = null;
+const USE_FIRESTORE = !!process.env.FIRESTORE_ENABLED || !!process.env.FIRESTORE_PROJECT_ID || !!process.env.GOOGLE_APPLICATION_CREDENTIALS;
+if (USE_FIRESTORE) {
+  try {
+    const { Firestore } = require('@google-cloud/firestore');
+    firestoreClient = new Firestore();
+    console.log('[server] Firestore inicializado');
+  } catch (e) {
+    console.warn('[server] Falha ao inicializar Firestore:', e && e.message ? e.message : e);
+    firestoreClient = null;
+  }
+}
+
 // OTP em memória (desaparecerá ao reiniciar o servidor)
 const otps = Object.create(null);
 
@@ -52,13 +66,24 @@ const server = http.createServer(async (req, res)=>{
   // Retorna lista de pedidos salvos localmente
   if (req.method === 'GET' && parsed.pathname === '/api/orders'){
     try {
+      if (firestoreClient) {
+        // Buscar últimos 200 pedidos do Firestore
+        const snapshot = await firestoreClient.collection('orders').orderBy('createdAt', 'desc').limit(200).get();
+        const orders = [];
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          orders.push(Object.assign({ id: doc.id }, d));
+        });
+        return sendJson(res, 200, { success: true, orders });
+      }
+
       const ordersFile = path.join(__dirname, 'data', 'orders.json');
       let existing = [];
       try { existing = JSON.parse(fs.readFileSync(ordersFile, 'utf8') || '[]'); } catch (e) { existing = []; }
-      return sendJson(res, 200, { ok: true, orders: existing });
+      return sendJson(res, 200, { success: true, orders: existing });
     } catch (e) {
-      console.error('[api/orders] error reading orders file', e && (e.stack||e));
-      return sendJson(res, 500, { ok: false, error: 'failed_to_read_orders' });
+      console.error('[api/orders] error reading orders', e && (e.stack||e));
+      return sendJson(res, 500, { success: false, error: 'failed_to_read_orders' });
     }
   }
 
@@ -139,6 +164,44 @@ const server = http.createServer(async (req, res)=>{
   }
 
   // Recebe notificação de pedido finalizado do frontend e envia e-mail ao admin
+  // Novo endpoint público para criação de pedidos via front-end
+  if (req.method === 'POST' && parsed.pathname === '/api/createOrder'){
+    try{
+      const body = await parseBody(req);
+      const order = (body && (body.order || body)) || null;
+      if (!order) return sendJson(res, 400, { error: 'Campo obrigatório: order' });
+      // garante id caso front não envie
+      if (!order.id) order.id = 'ORD-' + Date.now();
+
+      // grava pedido no Firestore se disponível, senão em arquivo local
+      try {
+        if (firestoreClient) {
+          const docRef = firestoreClient.collection('orders').doc(String(order.id));
+          await docRef.set(Object.assign({}, order, { createdAt: new Date(order.createdAt || Date.now()).toISOString() }));
+        } else {
+          const dataDir = path.join(__dirname, 'data');
+          if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+          const ordersFile = path.join(dataDir, 'orders.json');
+          let existing = [];
+          try { existing = JSON.parse(fs.readFileSync(ordersFile, 'utf8') || '[]'); } catch (e) { existing = []; }
+          existing = existing.filter(o => String(o.id) !== String(order.id));
+          existing.unshift(order);
+          existing = existing.slice(0, 200);
+          fs.writeFileSync(ordersFile, JSON.stringify(existing, null, 2), 'utf8');
+        }
+      } catch (eSave) {
+        console.warn('[createOrder] warning: falha ao salvar pedido', eSave && eSave.message ? eSave.message : eSave);
+        return sendJson(res, 500, { success: false, error: 'failed_to_save_order' });
+      }
+
+      // resposta padronizada
+      return sendJson(res, 200, { success: true, orderId: String(order.id) });
+    } catch (err) {
+      console.error('[createOrder] error', err && (err.stack || err));
+      return sendJson(res, 500, { success: false, error: err.message });
+    }
+  }
+
   if (req.method === 'POST' && parsed.pathname === '/api/order-complete'){
     try{
       const body = await parseBody(req);
@@ -254,4 +317,6 @@ const server = http.createServer(async (req, res)=>{
   sendJson(res, 404, { error: 'Not found' });
 });
 
-server.listen(3000, ()=> console.log('Rodando na porta 3000 (HTTP nativo)'));
+const PORT = process.env.PORT || 3001; // usa a porta do Vercel ou 3001 local
+server.listen(PORT, () => console.log(`Rodando na porta ${PORT} (HTTP nativo)`));
+

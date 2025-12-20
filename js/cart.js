@@ -2,7 +2,8 @@
 // CellShop - Shopping Cart System
 // ============================================
 
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
+// Cart is kept in-memory only (no localStorage). It will be sent to server when order is placed.
+let cart = [];
 
 // Add item to cart
 function addToCart(productId, quantity = 1) {
@@ -26,6 +27,7 @@ function addToCart(productId, quantity = 1) {
     }
 
     saveCart();
+    // in-memory change only
     updateCartUI();
     showNotification(`Quantidade ${quantity} adicionada ao carrinho!`, 'success');
 }
@@ -34,6 +36,7 @@ function addToCart(productId, quantity = 1) {
 function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     saveCart();
+    // in-memory change only
     updateCartUI();
     renderCartItems();
 }
@@ -50,14 +53,13 @@ function updateQuantity(productId, newQuantity) {
     
     item.quantity = newQuantity;
     saveCart();
+    // in-memory change only
+    // in-memory change only
     updateCartUI();
     renderCartItems();
 }
 
-// Save cart to localStorage
-function saveCart() {
-    localStorage.setItem('cart', JSON.stringify(cart));
-}
+// NOTE: Intentionally no persistence. Cart is transient and will be submitted to the server.
 
 // Update cart UI (count badge)
 function updateCartUI() {
@@ -163,9 +165,13 @@ function goToCheckout() {
         showNotification('Seu carrinho está vazio!', 'error');
         return;
     }
-    
-    // Save cart data for checkout
-    localStorage.setItem('checkoutCart', JSON.stringify(cart));
+    // Transfer cart to checkout without persisting locally.
+    // Use window.name as a transient transfer mechanism across the navigation (cleared by checkout page).
+    try {
+        window.name = JSON.stringify({ __cart_transfer: true, items: cart });
+    } catch (e) {
+        console.warn('Falha ao serializar cart para transferência:', e);
+    }
     window.location.href = 'checkout.html';
 }
 

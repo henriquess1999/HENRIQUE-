@@ -6,7 +6,7 @@ function postOrder(order) {
     const opts = {
       hostname: 'localhost',
       port: 3000,
-      path: '/api/order-complete',
+      path: '/api/createOrder',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

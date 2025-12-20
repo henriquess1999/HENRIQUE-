@@ -172,45 +172,53 @@
             e.preventDefault();
             const code = document.getElementById('trackingCode').value;
 
-            // Check if order exists
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const order = orders.find(o => o.id === code);
+            // Buscar pedido no servidor
+            try {
+                const resp = await fetch('/api/orders');
+                const json = await resp.json();
+                const orders = (json && json.orders) ? json.orders : [];
+                const order = orders.find(o => String(o.id) === String(code));
+                if (!order) {
+                    alert('❌ Pedido não encontrado. Verifique o código e tente novamente.');
+                    return;
+                }
 
-            if (!order) {
-                alert('❌ Pedido não encontrado. Verifique o código e tente novamente.');
+                // Show tracking result
+                document.getElementById('trackingResult').classList.add('active');
+                document.getElementById('orderNumber').textContent = order.id;
+                document.getElementById('orderStatus').textContent = order.status === 'paid' ? 'Em Trânsito' : 'Processando';
+                document.getElementById('trackingNumber').textContent = 'BR' + Math.random().toString().substr(2, 13) + 'US';
+
+                const deliveryDate = new Date();
+                deliveryDate.setDate(deliveryDate.getDate() + (order.shippingDays || 15));
+                document.getElementById('estimatedDelivery').textContent = deliveryDate.toLocaleDateString('pt-BR');
+
+                // Generate timeline
+                const timeline = document.getElementById('trackingTimeline');
+                const events = [
+                    { title: 'Pedido Recebido', date: new Date(order.createdAt), description: 'Seu pedido foi recebido e está sendo preparado', completed: true },
+                    { title: 'Pagamento Confirmado', date: new Date(order.createdAt), description: 'Pagamento aprovado com sucesso', completed: order.status === 'paid' },
+                    { title: 'Pedido Despachado', date: new Date(new Date(order.createdAt).getTime() + 2 * 24 * 60 * 60 * 1000), description: 'Produto saiu do centro de distribuição', completed: order.status === 'paid' },
+                    { title: 'Em Trânsito', date: new Date(new Date(order.createdAt).getTime() + 5 * 24 * 60 * 60 * 1000), description: 'Pacote está a caminho do destino', completed: false },
+                    { title: 'Entregue', date: deliveryDate, description: 'Pedido entregue no endereço', completed: false }
+                ];
+
+                timeline.innerHTML = events.map(event => `
+                    <div class="tracking-step ${event.completed ? 'completed' : ''}">
+                        <h3>${event.title}</h3>
+                        <div class="date">${event.date.toLocaleString('pt-BR')}</div>
+                        <div class="description">${event.description}</div>
+                    </div>
+                `).join('');
+
+                // Scroll to result
+                document.getElementById('trackingResult').scrollIntoView({ behavior: 'smooth' });
+                return;
+            } catch (e) {
+                console.error('Erro ao buscar pedidos:', e);
+                alert('Erro ao buscar pedidos. Tente novamente mais tarde.');
                 return;
             }
-
-            // Show tracking result
-            document.getElementById('trackingResult').classList.add('active');
-            document.getElementById('orderNumber').textContent = order.id;
-            document.getElementById('orderStatus').textContent = order.status === 'paid' ? 'Em Trânsito' : 'Processando';
-            document.getElementById('trackingNumber').textContent = 'BR' + Math.random().toString().substr(2, 13) + 'US';
-
-            const deliveryDate = new Date();
-            deliveryDate.setDate(deliveryDate.getDate() + order.shippingDays);
-            document.getElementById('estimatedDelivery').textContent = deliveryDate.toLocaleDateString('pt-BR');
-
-            // Generate timeline
-            const timeline = document.getElementById('trackingTimeline');
-            const events = [
-                { title: 'Pedido Recebido', date: new Date(order.createdAt), description: 'Seu pedido foi recebido e está sendo preparado', completed: true },
-                { title: 'Pagamento Confirmado', date: new Date(order.createdAt), description: 'Pagamento aprovado com sucesso', completed: order.status === 'paid' },
-                { title: 'Pedido Despachado', date: new Date(new Date(order.createdAt).getTime() + 2 * 24 * 60 * 60 * 1000), description: 'Produto saiu do centro de distribuição', completed: order.status === 'paid' },
-                { title: 'Em Trânsito', date: new Date(new Date(order.createdAt).getTime() + 5 * 24 * 60 * 60 * 1000), description: 'Pacote está a caminho do destino', completed: false },
-                { title: 'Entregue', date: deliveryDate, description: 'Pedido entregue no endereço', completed: false }
-            ];
-
-            timeline.innerHTML = events.map(event => `
-                <div class="tracking-step ${event.completed ? 'completed' : ''}">
-                    <h3>${event.title}</h3>
-                    <div class="date">${event.date.toLocaleString('pt-BR')}</div>
-                    <div class="description">${event.description}</div>
-                </div>
-            `).join('');
-
-            // Scroll to result
-            document.getElementById('trackingResult').scrollIntoView({ behavior: 'smooth' });
         });
     </script>
 </body>

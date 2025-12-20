@@ -254,20 +254,39 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <script src="js/products.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const order = JSON.parse(localStorage.getItem('lastOrder'));
+        async function fetchOrderById(orderId) {
+            try {
+                const resp = await fetch('/api/orders');
+                const json = await resp.json();
+                const orders = (json && json.orders) ? json.orders : [];
+                return orders.find(o => String(o.id) === String(orderId)) || null;
+            } catch (e) {
+                console.error('Erro ao buscar pedido:', e);
+                return null;
+            }
+        }
 
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const orderId = params.get('orderId');
+            if (!orderId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const order = await fetchOrderById(orderId);
             if (!order) {
+                // não achou no servidor -> volta para home
                 window.location.href = 'index.html';
                 return;
             }
 
             // Display order number
             document.getElementById('orderNumber').textContent = order.id;
-            document.getElementById('customerEmail').textContent = order.customer.email;
+            document.getElementById('customerEmail').textContent = (order.customer && order.customer.email) ? order.customer.email : '';
 
             // Display order details
-            const currency = localStorage.getItem('currency') || 'USD';
+            const currency = (window && window.CURRENCY) ? window.CURRENCY : (localStorage.getItem ? (localStorage.getItem('currency') || 'USD') : 'USD');
             const orderDetails = document.getElementById('orderDetails');
             orderDetails.innerHTML = `
                 <div class="order-detail-row">
@@ -276,19 +295,19 @@
                 </div>
                 <div class="order-detail-row">
                     <span>Itens:</span>
-                    <strong>${order.items.reduce((sum, item) => sum + item.quantity, 0)} produto(s)</strong>
+                    <strong>${(Array.isArray(order.items) ? order.items.reduce((sum, item) => sum + (Number(item.quantity)||0), 0) : 0)} produto(s)</strong>
                 </div>
                 <div class="order-detail-row">
                     <span>Total:</span>
-                    <strong>${formatPrice(order.total, currency)}</strong>
+                    <strong>${formatPrice(order.total || order.subtotal || 0, currency)}</strong>
                 </div>
                 <div class="order-detail-row">
                     <span>Prazo de Entrega:</span>
-                    <strong>${order.shippingDays} dias úteis</strong>
+                    <strong>${order.shippingDays || 15} dias úteis</strong>
                 </div>
                 <div class="order-detail-row">
                     <span>Endereço:</span>
-                    <strong>${order.customer.city}, ${order.customer.state}</strong>
+                    <strong>${(order.customer && (order.customer.city || order.customer.state)) ? ((order.customer.city||'') + (order.customer.state ? ', ' + order.customer.state : '')) : ''}</strong>
                 </div>
             `;
 

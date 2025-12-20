@@ -532,7 +532,17 @@
                 if (!summaryContainer) return;
                 let items = [];
                 try {
-                    items = JSON.parse(localStorage.getItem('checkoutCart') || localStorage.getItem('cart') || '[]') || [];
+                    // Não usar localStorage — tenta ler transferência via window.name
+                    if (window && window.name) {
+                        try {
+                            const w = JSON.parse(window.name || '{}');
+                            if (w && w.__cart_transfer && Array.isArray(w.items)) {
+                                items = w.items || [];
+                                // limpa window.name para não persistir
+                                window.name = '';
+                            }
+                        } catch (e) { items = []; }
+                    }
                 } catch(e) { items = []; }
 
                 if (!items.length) {

@@ -388,3 +388,29 @@ Invoke-RestMethod -Uri "http://localhost:3000/api/send-sms" -Method POST -Body (
 - Limitar frequência para evitar spam.
 - Registrar logs e status de entrega (Twilio Callback Webhook em produção).
 
+## 🔐 Definir usuário como `admin` (Firebase)
+
+Passos rápidos para atribuir a custom claim `admin=true` a um usuário:
+
+- Baixe o Service Account JSON no Firebase Console → Project settings → Service accounts e coloque no projeto.
+- Edite `setAdmin.js` na raiz do projeto:
+  - Atualize o caminho do Service Account JSON (`./caminho/para/seu/serviceAccountKey.json`).
+  - Substitua `UID_DO_USUARIO_ADMIN` pelo UID do usuário (Console → Authentication → Users → clique na conta → UID).
+- Instale dependências se necessário:
+```bash
+npm install firebase-admin
+```
+- Execute:
+```bash
+node setAdmin.js
+```
+
+Saída esperada: `Conta <UID_DO_USUARIO_ADMIN> agora é admin!`
+
+Verificar a claim no servidor (opcional):
+```js
+admin.auth().getUser(uid).then(u => console.log(u.customClaims))
+```
+
+Observação: peça ao usuário para fazer logout/login no cliente para o token ser atualizado.
+

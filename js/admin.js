@@ -4,15 +4,16 @@
 
 // Check admin authentication
 document.addEventListener('DOMContentLoaded', async () => {
-    const adminSession = JSON.parse(localStorage.getItem('adminSession'));
-    
+    // NOTE: não dependemos mais de localStorage para pedidos; apenas autenticação mínima é lida do sessionStorage
+    let adminSession = null;
+    try { adminSession = JSON.parse(sessionStorage.getItem('adminSession') || 'null'); } catch(e) { adminSession = null; }
     if (!adminSession) {
         window.location.href = 'admin.login.html';
         return;
     }
 
-    // tenta sincronizar pedidos remotos com localStorage (se o servidor fornecer /api/orders)
-    try { await syncRemoteOrders(); } catch (e) { /* falha não é crítica, continua com localStorage */ }
+    // Carrega pedidos diretamente do servidor (Firestore ou fallback local)
+    try { await syncRemoteOrders(); } catch (e) { console.warn('Falha ao buscar pedidos do servidor', e); }
     
     // Load dashboard data
     loadDashboardData();
@@ -57,11 +58,10 @@ async function syncRemoteOrders(){
 
         if (!data) throw new Error('no_remote_orders');
         if (data && Array.isArray(data.orders) && data.orders.length){
-            // grava no localStorage para o painel usar
-            localStorage.setItem('orders', JSON.stringify(data.orders));
-            // extrai customers rápidos
+            // manter em memória (global) para o painel usar — não persistir no localStorage
+            window.ADMIN_ORDERS = data.orders;
             const customers = (data.orders.map(o => (o.customer || {}))).filter(Boolean).map((c, idx) => ({ id: c.id || ('remote-' + (c.email||c.name||idx)), name: c.name || c.email || '', email: c.email || '', createdAt: c.createdAt || new Date().toISOString() }));
-            if (customers.length) localStorage.setItem('customers', JSON.stringify(customers));
+            window.ADMIN_CUSTOMERS = customers;
         }
     }catch(err){
         console.warn('[syncRemoteOrders] não foi possível sincronizar pedidos remotos', err && err.message ? err.message : err);
@@ -95,6 +95,25 @@ function showSection(sectionId) {
     const titleEl = document.getElementById('sectionTitle');
     if (titleEl) titleEl.textContent = titles[sectionId] || sectionId;
 }
+
+// Shim: evitar persistência real no localStorage para chaves críticas de admin
+(function(){
+    try {
+        const ls = window.localStorage;
+        const origGet = ls.getItem.bind(ls);
+        const origSet = ls.setItem.bind(ls);
+        ls.getItem = function(k){
+            if (k === 'orders') return JSON.stringify(window.ADMIN_ORDERS || []);
+            if (k === 'customers') return JSON.stringify(window.ADMIN_CUSTOMERS || []);
+            return origGet(k);
+        };
+        ls.setItem = function(k,v){
+            if (k === 'orders') { try { window.ADMIN_ORDERS = JSON.parse(v||'[]'); } catch(e){ window.ADMIN_ORDERS = []; } return; }
+            if (k === 'customers') { try { window.ADMIN_CUSTOMERS = JSON.parse(v||'[]'); } catch(e){ window.ADMIN_CUSTOMERS = []; } return; }
+            return origSet(k,v);
+        };
+    } catch(e){ /* ambiente restrito: ignora shim */ }
+})();
 
 // Load Dashboard Data
 function loadDashboardData() {

@@ -545,11 +545,23 @@ window.addEventListener('load', () => {
 // ============================================
 
 function getCheckoutCartItems() {
+    // Não usar localStorage. Tenta ler transferência transitória via window.name (definida por `goToCheckout`).
     try {
-        return JSON.parse(localStorage.getItem('checkoutCart') || localStorage.getItem('cart') || '[]') || [];
-    } catch(e) {
-        return [];
-    }
+        if (window && window.name) {
+            try {
+                const w = JSON.parse(window.name || '{}');
+                if (w && w.__cart_transfer && Array.isArray(w.items)) {
+                    // limpa a janela para não persistir dados
+                    window.name = '';
+                    return w.items || [];
+                }
+            } catch (e) {
+                // se window.name não for JSON, ignorar
+            }
+        }
+    } catch (e) { /* ignore */ }
+    // fallback: nenhum carrinho disponível no front-end (sem persistência)
+    return [];
 }
 
 function getCheckoutTotals() {
@@ -594,40 +606,14 @@ async function placeOrder() {
         cnpj: (data.get('cnpj') || '').toString().trim()
     };
 
-    const items = getCheckoutCartItems();
+    const items = getCheckoutCartItems() || [];
     const totals = getCheckoutTotals();
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const customers = JSON.parse(localStorage.getItem('customers') || '[]');
     const id = 'ORD-' + Date.now();
     const nowIso = new Date().toISOString();
 
-    // Encontrar cliente existente (mesmo e-mail) ou criar novo
-    const keyEmail = rawCustomer.email.toLowerCase();
-    let customer = customers.find(c => (c.email || '').toLowerCase() === keyEmail);
-    if (!customer) {
-        customer = {
-            id: 'CUST-' + Date.now(),
-            ...rawCustomer,
-            createdAt: nowIso,
-            ordersCount: 0,
-            orderIds: [],
-            orderDates: []
-        };
-        customers.push(customer);
-    } else {
-        // Atualiza dados básicos caso tenham mudado
-        customer.name = rawCustomer.name || customer.name;
-        customer.phone = rawCustomer.phone || customer.phone;
-        customer.country = rawCustomer.country || customer.country;
-        customer.state = rawCustomer.state || customer.state;
-        customer.city = rawCustomer.city || customer.city;
-        customer.address = rawCustomer.address || customer.address;
-        customer.cnpj = rawCustomer.cnpj || customer.cnpj;
-    }
-
+    // Monta payload mínimo e envia ao servidor. O front-end NÃO persiste nada.
     const order = {
         id,
-        customerId: customer.id,
         customer: rawCustomer,
         items,
         subtotal: totals.subtotal,
@@ -638,17 +624,30 @@ async function placeOrder() {
         shippingDays: 15
     };
 
-    orders.unshift(order);
-    customer.ordersCount = (customer.ordersCount || 0) + 1;
-    customer.orderIds = [id].concat(customer.orderIds || []);
-    customer.orderDates = [nowIso].concat(customer.orderDates || []);
-
-    localStorage.setItem('orders', JSON.stringify(orders));
-    localStorage.setItem('customers', JSON.stringify(customers));
-
-    // limpa carrinhos usados no front
-    localStorage.removeItem('checkoutCart');
-    localStorage.removeItem('cart');
+    try {
+        const CREATE_ENDPOINT = window.CREATE_ORDER_ENDPOINT || '/api/createOrder';
+        console.log("Pedido enviado:", order);
+        const res = await fetch(CREATE_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order })
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            console.error('Falha ao criar pedido', json);
+            alert('Erro ao enviar pedido. Tente novamente.');
+            return;
+        }
+        // Ao retornar, servidor deve incluir o pedido salvo. Redireciona para página de sucesso com id.
+        const returnedOrder = (json && (json.order || json.savedOrder)) || order;
+        const orderId = returnedOrder && returnedOrder.id ? returnedOrder.id : id;
+        window.location.href = `order-success.html?orderId=${encodeURIComponent(orderId)}`;
+        return;
+    } catch (err) {
+        console.error('Erro ao chamar /api/createOrder', err);
+        alert('Erro de rede ao enviar pedido. Tente novamente.');
+        return;
+    }
 
     // Enviar notificação de pedido (SMS) ao admin — configure `SMS_NOTIFY_ENDPOINT` abaixo
     try {

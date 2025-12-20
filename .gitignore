@@ -1,5 +1,6 @@
 node_modules/
 .env
+.env.local
 .vercel/
 server/node_modules/
 *.log
