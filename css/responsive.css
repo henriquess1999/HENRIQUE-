@@ -1,0 +1,87 @@
+/* Responsive adjustments for mobile devices ~6.9" (approx width <= 430px) */
+
+/* Base adjustments */
+@media (max-width: 430px) {
+  html, body {
+    -webkit-text-size-adjust: 100%;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  .container, .page, .content, .dashboard-card {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Ensure images and videos scale */
+  img, video {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Make buttons easier to tap */
+  button, .btn, .admin-btn, .action-btn {
+    min-height: 40px !important;
+    padding: 8px 10px !important;
+    font-size: 15px !important;
+  }
+
+  /* Inputs full width */
+  input, textarea, select {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 15px !important;
+  }
+
+  /* Tables: allow horizontal scroll and reduce padding */
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .admin-table th, .admin-table td {
+    padding: 0.45rem 0.5rem !important;
+    font-size: 13px !important;
+    white-space: nowrap;
+  }
+
+  /* Cards and dashboard items stack vertically */
+  .stats-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Sidebar: collapse to icon-only and keep content readable */
+  .admin-sidebar {
+    width: 64px !important;
+  }
+  .admin-sidebar .admin-logo span, .admin-sidebar .admin-nav span, .admin-user-info strong, .admin-user-info span {
+    display: none !important;
+  }
+  .admin-content {
+    margin-left: 64px !important;
+    padding: 10px !important;
+  }
+
+  /* Header: compact */
+  .admin-header h1 { font-size: 18px !important; }
+
+  /* Modals should use most of viewport */
+  .admin-modal .admin-modal-content,
+  .modal .modal-content {
+    width: calc(100% - 24px) !important;
+    height: auto !important;
+    max-height: calc(100vh - 32px) !important;
+    overflow: auto !important;
+    border-radius: 8px !important;
+  }
+
+  /* Make action-buttons wrap */
+  .action-buttons { display:flex; gap:6px; flex-wrap:wrap; }
+
+  /* Compact dashboard cards spacing */
+  .dashboard-card { padding: 10px !important; }
+
+  /* Ensure hero and sliders don't overflow */
+  .hero, .hero-slide { height: auto !important; }
+}

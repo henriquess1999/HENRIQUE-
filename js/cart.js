@@ -8,7 +8,8 @@ let cart = [];
 // Add item to cart
 function addToCart(productId, quantity = 1) {
     const source = Array.isArray(window.products) ? window.products : products;
-    const product = source.find(p => p.id === productId);
+    // tolerância a tipos: compara como string para evitar mismatches entre number/string
+    const product = source.find(p => String(p.id) === String(productId));
     if (!product) return;
 
     quantity = parseInt(quantity, 10) || 1;
@@ -26,7 +27,8 @@ function addToCart(productId, quantity = 1) {
         });
     }
 
-    saveCart();
+    // salvar estado do carrinho (no momento não persistimos, mas mantemos hook caso deseje)
+    try { saveCart(); } catch (e) { /* noop if saveCart not implemented */ }
     // in-memory change only
     updateCartUI();
     showNotification(`Quantidade ${quantity} adicionada ao carrinho!`, 'success');
@@ -35,7 +37,7 @@ function addToCart(productId, quantity = 1) {
 // Remove item from cart
 function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
-    saveCart();
+    try { saveCart(); } catch (e) {}
     // in-memory change only
     updateCartUI();
     renderCartItems();
@@ -52,11 +54,17 @@ function updateQuantity(productId, newQuantity) {
     }
     
     item.quantity = newQuantity;
-    saveCart();
+    try { saveCart(); } catch (e) {}
     // in-memory change only
     // in-memory change only
     updateCartUI();
     renderCartItems();
+}
+
+// Hook para persistência do carrinho — atualmente intencionalmente vazio (cart é transitório).
+function saveCart() {
+    // Implementar persistência se desejar (ex: localStorage)
+    return;
 }
 
 // NOTE: Intentionally no persistence. Cart is transient and will be submitted to the server.
@@ -125,7 +133,7 @@ function renderCartItems() {
             : '';
         return `
         <div class="cart-item">
-            <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+            <img src="${item.image || 'logo-e2w.jpeg'}" alt="${item.name}" class="cart-item-image" onerror="this.onerror=null;this.src='logo-e2w.jpeg'">
             <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
                 ${priceHtml}

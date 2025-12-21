@@ -2,6 +2,8 @@
 
 Projeto de frontend simples + pequena API para envio de e-mails e notificações.
 
+NOTE: Firebase/Firestore integration has been removed from this project. The client and server code no longer attempt to initialize or use Firebase. If you followed earlier instructions in this README about Firebase, ignore them.
+
 Principais pontos:
 - Frontend: arquivos HTML/CSS/JS em raiz e `js/`.
 - Admin: painel em `admin-dashboarrd.html` com lógica em `js/admin.js`.
@@ -118,6 +120,13 @@ htms/
 ```
 
 ## 🚀 Como Usar
+
+### Observação sobre Firebase
+
+O suporte a Firebase/Firestore foi removido deste repositório por opção do mantenedor. O código cliente e o servidor não dependem mais do SDK do Firebase. Os fluxos de persistência usam o endpoint local `/api/createOrder` e arquivos locais em `data/`.
+
+Se você precisar reativar integrações com Firestore no futuro, posso guiar a reversão ou reimplementação passo a passo.
+
 
 ### 1. **Acessar a Loja**
 - Abra `index.html` no navegador

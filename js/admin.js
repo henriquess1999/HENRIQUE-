@@ -14,7 +14,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Carrega pedidos diretamente do servidor (Firestore ou fallback local)
     try { await syncRemoteOrders(); } catch (e) { console.warn('Falha ao buscar pedidos do servidor', e); }
-    
+
+    // Firestore removed: realtime subscription disabled. Admin will use HTTP polling only.
+    try {
+        console.info('[admin] Firebase removed — realtime onSnapshot disabled. Using HTTP polling.');
+    } catch (e) { console.warn('[admin] realtime-fallback init failed', e); }
+    // If onSnapshot is not available (no Firestore client or not permitted), poll the server periodically
+    try {
+        // avoid multiple intervals
+        if (!window.__ADMIN_POLL_INTERVAL) {
+            // initial previous count
+            window.__ADMIN_ORDERS = window.__ADMIN_ORDERS || [];
+            const pollFn = async () => {
+                try {
+                    // only poll if not using realtime subscription
+                    if (window.__ADMIN_ORDERS_UNSUB) return;
+                    const prevCount = (window.ADMIN_ORDERS || []).length;
+                    await syncRemoteOrders();
+                    const newCount = (window.ADMIN_ORDERS || []).length;
+                    if (newCount > prevCount) {
+                        console.info('[admin] novos pedidos detectados via polling:', newCount - prevCount);
+                        // update UI counters/badge
+                        updatePendingOrdersBadge(window.ADMIN_ORDERS);
+                        loadAllOrders();
+                    }
+                } catch (err) { /* ignore polling errors */ }
+            };
+            // first poll after 5s, then every 15s
+            window.__ADMIN_POLL_INTERVAL = setInterval(pollFn, 15000);
+            setTimeout(pollFn, 5000);
+            // clear on unload
+            window.addEventListener('beforeunload', () => { try { clearInterval(window.__ADMIN_POLL_INTERVAL); } catch(e){} });
+        }
+    } catch(e){ console.warn('[admin] failed to start polling', e); }
+
     // Load dashboard data
     loadDashboardData();
     loadCharts();
@@ -31,12 +64,20 @@ async function syncRemoteOrders(){
     try{
         let resp;
         let data = null;
-        try {
-            resp = await fetch('/api/orders', { method: 'GET', credentials: 'same-origin' });
-            if (resp && resp.ok) data = await resp.json();
-        } catch (e) {
-            // fallback: tentaremos usar config.json.storageEndpoint
-            data = null;
+
+        // Firestore removed — fetch orders via HTTP endpoints only
+
+        // Fallback para endpoints HTTP se Firestore não disponível ou falhou
+        if (!data) {
+            const apiCandidates = ['/api/orders', 'http://localhost:3001/api/orders', 'http://127.0.0.1:3001/api/orders'];
+            for (const candidate of apiCandidates) {
+                try {
+                    resp = await fetch(candidate, { method: 'GET', credentials: 'same-origin' });
+                    if (resp && resp.ok) { data = await resp.json(); break; }
+                } catch (e) {
+                    data = null;
+                }
+            }
         }
 
         if ((!data || !data.orders) || !Array.isArray(data.orders) || !data.orders.length) {
@@ -56,11 +97,37 @@ async function syncRemoteOrders(){
             }
         }
 
-        if (!data) throw new Error('no_remote_orders');
+        if (!data) {
+            try {
+                const dbg = await fetch('/api/_debug_orders');
+                if (dbg && dbg.ok) {
+                    try { const dbgJson = await dbg.json(); console.info('[syncRemoteOrders] debug:', dbgJson); } catch(e) { console.info('[syncRemoteOrders] debug text', await dbg.text().catch(()=>null)); }
+                } else {
+                    console.info('[syncRemoteOrders] /api/_debug_orders fetch failed', dbg && dbg.status);
+                }
+            } catch(e) { console.info('[syncRemoteOrders] debug fetch failed', e); }
+            throw new Error('no_remote_orders');
+        }
         if (data && Array.isArray(data.orders) && data.orders.length){
             // manter em memória (global) para o painel usar — não persistir no localStorage
             window.ADMIN_ORDERS = data.orders;
-            const customers = (data.orders.map(o => (o.customer || {}))).filter(Boolean).map((c, idx) => ({ id: c.id || ('remote-' + (c.email||c.name||idx)), name: c.name || c.email || '', email: c.email || '', createdAt: c.createdAt || new Date().toISOString() }));
+            // tentar buscar vendas remotas também
+            try{
+                const salesResp = await fetch((window.location && window.location.host && (window.location.host.includes('localhost') || window.location.host.includes('127.0.0.1'))) ? '/api/sales' : 'http://localhost:3001/api/sales');
+                if (salesResp && salesResp.ok){
+                    const sj = await salesResp.json();
+                    if (sj && Array.isArray(sj.sales)) window.ADMIN_SALES = sj.sales;
+                }
+            }catch(e){ /* não crítico */ }
+            const customers = (data.orders.map(o => (o.customer || {}))).filter(Boolean).map((c, idx) => ({
+                id: c.id || ('remote-' + (c.email||c.name||idx)),
+                name: c.name || c.email || '',
+                email: c.email || '',
+                phone: c.phone || '',
+                country: c.country || '',
+                cnpj: c.cnpj || c.document || '',
+                createdAt: c.createdAt || new Date().toISOString()
+            }));
             window.ADMIN_CUSTOMERS = customers;
         }
     }catch(err){
@@ -220,6 +287,9 @@ function loadRecentOrders(orders) {
                 <td class="action-buttons">
                     <button class="action-btn view" onclick="viewOrder('${order.id}')">
                         <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="deleteOrder('${order.id}')" title="Excluir pedido">
+                        <i class="fas fa-trash"></i>
                     </button>
                 </td>
             </tr>
@@ -589,7 +659,8 @@ function loadSales() {
     const commEl = document.getElementById('salesCommissionTotal');
     if (!tbody || !totalEl || !commEl) return;
 
-    const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+    // Prefer remote sales when available
+    const sales = Array.isArray(window.ADMIN_SALES) && window.ADMIN_SALES.length ? window.ADMIN_SALES : JSON.parse(localStorage.getItem('sales') || '[]');
     const today = new Date().toDateString();
 
     const todaySales = sales.filter(s => new Date(s.createdAt).toDateString() === today);
@@ -620,6 +691,11 @@ function loadSales() {
                 <td>${s.customerName || '-'}</td>
                 <td>R$ ${formatBRL(amount)}</td>
                 <td>R$ ${formatBRL(commission)}</td>
+                <td class="action-buttons">
+                    <button class="action-btn delete" onclick="deleteSale('${s.id}')" title="Excluir venda">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
             </tr>
         `;
     }).join('');
@@ -663,6 +739,11 @@ function loadFinancial() {
                 <td>${r.customerName || '-'}</td>
                 <td>R$ ${formatBRL(amount)}</td>
                 <td>R$ ${formatBRL(commission)}</td>
+                <td class="action-buttons">
+                    <button class="action-btn delete" onclick="deleteFinancial('${r.id}')" title="Excluir registro financeiro">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
             </tr>
         `;
     }).join('');
@@ -724,6 +805,65 @@ function _formatFinancialSummaryText(summary) {
         });
     }
     return text;
+}
+
+// Excluir uma venda (frontend + server)
+function deleteSale(saleId) {
+    if (!saleId) return alert('ID da venda inválido.');
+    if (!confirm('Tem certeza que deseja excluir esta venda permanentemente?')) return;
+
+    // Remove localmente
+    let sales = JSON.parse(localStorage.getItem('sales') || '[]');
+    const before = sales.length;
+    sales = sales.filter(s => String(s.id) !== String(saleId));
+    localStorage.setItem('sales', JSON.stringify(sales));
+
+    // Remove de window.ADMIN_SALES se existir
+    try{
+        if (Array.isArray(window.ADMIN_SALES)) {
+            window.ADMIN_SALES = window.ADMIN_SALES.filter(s => String(s.id) !== String(saleId));
+        }
+    }catch(e){}
+
+    // Atualiza UI
+    loadSales();
+    loadFinancial();
+
+    // Tenta remover no servidor
+    (async ()=>{
+        try{
+            const apiHost = (window.location && window.location.host && (window.location.host.includes('localhost') || window.location.host.includes('127.0.0.1'))) ? '' : 'http://localhost:3001';
+            const url = apiHost + '/api/sales?id=' + encodeURIComponent(saleId);
+            const resp = await fetch(url, { method: 'DELETE' });
+            try { const j = await resp.json(); console.log('[deleteSale] server', j); } catch(e){ console.log('[deleteSale] server non-json'); }
+        }catch(e){ console.warn('[deleteSale] failed to call server delete', e); }
+    })();
+
+    if (before !== sales.length) {
+        alert('✅ Venda excluída com sucesso.');
+    } else {
+        alert('⚠️ Venda não encontrada localmente; tentativa de remoção enviada ao servidor.');
+    }
+}
+
+// Excluir um registro financeiro consolidado (frontend)
+function deleteFinancial(financialId) {
+    if (!financialId) return alert('ID do registro financeiro inválido.');
+    if (!confirm('Tem certeza que deseja excluir este registro financeiro? Esta ação é permanente.')) return;
+
+    let financial = JSON.parse(localStorage.getItem('financialRecords') || '[]');
+    const before = financial.length;
+    financial = financial.filter(r => String(r.id) !== String(financialId));
+    localStorage.setItem('financialRecords', JSON.stringify(financial));
+
+    // Atualiza UI
+    loadFinancial();
+
+    if (before !== financial.length) {
+        alert('✅ Registro financeiro excluído.');
+    } else {
+        alert('⚠️ Registro não encontrado localmente.');
+    }
 }
 
 async function _copyTextToClipboard(text) {
@@ -828,7 +968,7 @@ function loadProducts() {
     tbody.innerHTML = allProducts.map(product => {
         return `
             <tr>
-                <td><img src="${product.image}" alt="${product.name}" class="product-image-small"></td>
+                <td><img src="${product.image || 'logo-e2w.jpeg'}" alt="${product.name}" class="product-image-small" onerror="this.onerror=null;this.src='logo-e2w.jpeg'"></td>
                 <td><strong class="product-name">${product.name}</strong></td>
                 <td>${getCategoryName(product.category)}</td>
                 <td class="action-buttons">
@@ -957,7 +1097,8 @@ function loadAllOrders() {
     const tbody = document.getElementById('ordersTable');
     if (!tbody) return;
 
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    // Prefer server-synced orders when available
+    const orders = Array.isArray(window.ADMIN_ORDERS) && window.ADMIN_ORDERS.length ? window.ADMIN_ORDERS : JSON.parse(localStorage.getItem('orders') || '[]');
 
     if (!orders.length) {
         tbody.innerHTML = `
@@ -1021,6 +1162,9 @@ function loadAllOrders() {
                 <td class="action-buttons">
                     <button class="action-btn delete" onclick="deleteCustomer('${order.customerId}')">
                         <i class="fas fa-user-times"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="deleteOrder('${order.id}')" title="Excluir pedido">
+                        <i class="fas fa-trash"></i>
                     </button>
                 </td>
             </tr>
@@ -1162,10 +1306,24 @@ function deleteCustomer(customerId) {
 
 function updateOrderStatus(orderId, direction) {
     let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const idx = orders.findIndex(o => o.id === orderId);
-    if (idx === -1) return;
-
-    const current = orders[idx];
+    let idx = orders.findIndex(o => o.id === orderId);
+    let current = null;
+    let source = 'local';
+    if (idx !== -1) {
+        current = orders[idx];
+    } else if (Array.isArray(window.ADMIN_ORDERS)) {
+        const ridx = window.ADMIN_ORDERS.findIndex(o => String(o.id) === String(orderId));
+        if (ridx !== -1) {
+            current = window.ADMIN_ORDERS[ridx];
+            source = 'remote';
+            // ensure local storage has a copy so other functions work
+            orders.unshift(current);
+            orders = orders.filter((o, i, arr) => arr.findIndex(x => String(x.id) === String(o.id)) === i);
+            idx = orders.findIndex(o => String(o.id) === String(orderId));
+            localStorage.setItem('orders', JSON.stringify(orders));
+        }
+    }
+    if (!current) return;
 
     if (direction === 'up') {
         current.status = 'done';
@@ -1184,6 +1342,16 @@ function updateOrderStatus(orderId, direction) {
                 willConsolidateAt: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString()
             });
             localStorage.setItem('sales', JSON.stringify(sales));
+            // também persistir no servidor
+            (async ()=>{
+                try{
+                    const payload = { sale: sales[sales.length - 1] };
+                    const apiHost = (window.location && window.location.host && (window.location.host.includes('localhost') || window.location.host.includes('127.0.0.1'))) ? '' : 'http://localhost:3001';
+                    const url = apiHost + '/api/sales';
+                    const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    try { console.log('[persistSale] server response', await resp.json()); } catch(e){ console.log('[persistSale] non-json'); }
+                }catch(e){ console.warn('[persistSale] failed', e); }
+            })();
         }
 
     } else if (direction === 'down') {
@@ -1197,6 +1365,21 @@ function updateOrderStatus(orderId, direction) {
 
     orders[idx] = current;
     localStorage.setItem('orders', JSON.stringify(orders));
+
+    // If modified a remote-backed order, update window.ADMIN_ORDERS and persist to server
+    if (source === 'remote') {
+        try {
+            const ridx = window.ADMIN_ORDERS.findIndex(o => String(o.id) === String(orderId));
+            if (ridx !== -1) window.ADMIN_ORDERS[ridx] = current;
+        } catch(e){}
+        (async ()=>{
+            try {
+                const apiHost = (window.location && window.location.host && (window.location.host.includes('localhost') || window.location.host.includes('127.0.0.1'))) ? '' : 'http://localhost:3001';
+                const resp = await fetch(apiHost + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: current }) });
+                try { console.log('[updateOrderStatus] persisted remote order', await resp.json()); } catch(e) { console.log('[updateOrderStatus] persisted remote order (non-json)'); }
+            } catch(e) { console.warn('[updateOrderStatus] failed to persist remote order', e); }
+        })();
+    }
 
     // Atualiza status visual nas duas listas (recentes e todos)
     const isNowDone = current.status === 'done';
@@ -1217,6 +1400,17 @@ function updateOrderStatus(orderId, direction) {
     loadSales();
     // Atualiza financeiro (caso alguma venda tenha passado de 6h)
     consolidateSalesToFinancial();
+
+    // Persistir alteração de status no servidor (tenta atualizar a cópia em orders.json)
+    (async ()=>{
+        try {
+            const apiHost = (window.location && window.location.host && (window.location.host.includes('localhost') || window.location.host.includes('127.0.0.1'))) ? '' : 'http://localhost:3001';
+            const url = apiHost + '/api/orders';
+            const payload = { order: current };
+            const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            try { const j = await resp.json(); console.log('[updateOrderStatus] upsert response', j); } catch(e){ console.log('[updateOrderStatus] non-json response'); }
+        } catch(e){ console.warn('[updateOrderStatus] failed to persist order status', e); }
+    })();
 }
 
 function updateOrderTotal(orderId, newValue) {
@@ -1437,6 +1631,89 @@ function deleteProduct(productId) {
     }
 }
 
+// Excluir um pedido específico (frontend)
+function deleteOrder(orderId) {
+    if (!orderId) return alert('ID do pedido inválido.');
+    if (!confirm('Tem certeza que deseja excluir este pedido permanentemente?')) return;
+    // First, ask server to delete the order. Only update local state after server confirms deletion.
+    (async ()=>{
+        const tryDelete = async (base) => {
+            try {
+                const url = (base || '') + '/api/orders?id=' + encodeURIComponent(orderId);
+                const resp = await fetch(url, { method: 'DELETE' });
+                let body = null;
+                try { body = await resp.json(); } catch(e) { body = null; }
+                return { ok: resp.ok, status: resp.status, body };
+            } catch(e) {
+                return { ok: false, error: e };
+            }
+        };
+
+        try {
+            // Deriva origem da API preferencial a partir de `window.CREATE_ORDER_ENDPOINT` quando disponível
+            let origins = [];
+            try {
+                if (window.CREATE_ORDER_ENDPOINT) {
+                    try { origins.push(new URL(window.CREATE_ORDER_ENDPOINT).origin); } catch(e) {}
+                }
+            } catch(e) {}
+
+            // se estiver em ambiente de desenvolvimento (porta diferente), tente explicitamente o servidor local na 3001
+            origins.push('http://localhost:3001');
+            origins.push('http://127.0.0.1:3001');
+
+            // tentar sem origin (rota relativa) apenas se hospedado na mesma origem da API
+            origins.push('');
+
+            let finalResult = null;
+            for (const origin of origins) {
+                // First try DELETE
+                const r = await tryDelete(origin);
+                console.log('[deleteOrder] attempt DELETE', origin || '(relative)', r);
+                if (r && r.ok) { finalResult = r; break; }
+
+                // If DELETE failed or returned non-ok, try POST fallback with _method=DELETE
+                try {
+                    const fallbackUrl = (origin || '') + '/api/orders?_method=DELETE&id=' + encodeURIComponent(orderId);
+                    const resp2 = await fetch(fallbackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: orderId }) });
+                    let body2 = null;
+                    try { body2 = await resp2.json(); } catch(e) { body2 = null; }
+                    console.log('[deleteOrder] attempt POST-fallback', origin || '(relative)', resp2 && resp2.status, body2);
+                    if (resp2 && resp2.ok) { finalResult = { ok: resp2.ok, status: resp2.status, body: body2 }; break; }
+                } catch(e) {
+                    console.warn('[deleteOrder] POST-fallback error for origin', origin, e);
+                }
+            }
+
+            if (finalResult && finalResult.ok && finalResult.body && (finalResult.body.removed || finalResult.body.removed === 0)) {
+                if (finalResult.body.removed > 0) {
+                    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    orders = orders.filter(o => String((o && o.id) || '').trim() !== String(orderId || '').trim());
+                    localStorage.setItem('orders', JSON.stringify(orders));
+                    loadAllOrders();
+                    loadDashboardData();
+                    alert('✅ Pedido excluído com sucesso.');
+                } else {
+                    // server had none; still update local copy to reflect admin action
+                    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    const had = orders.some(o => String((o && o.id) || '').trim() === String(orderId || '').trim());
+                    orders = orders.filter(o => String((o && o.id) || '').trim() !== String(orderId || '').trim());
+                    localStorage.setItem('orders', JSON.stringify(orders));
+                    loadAllOrders();
+                    loadDashboardData();
+                    if (had) alert('Pedido removido localmente. O servidor não tinha este pedido.'); else alert('Pedido não encontrado no servidor nem localmente.');
+                }
+            } else {
+                console.warn('[deleteOrder] all delete attempts failed. last result:', finalResult);
+                alert('Falha ao remover pedido no servidor. Veja o console para detalhes.');
+            }
+        } catch(e) {
+            console.warn('[deleteOrder] erro ao chamar API de remoção', e);
+            alert('Erro de rede ao tentar excluir o pedido. Tente novamente.');
+        }
+    })();
+}
+
 function viewCustomer(customerId) {
     const legacyUsers = JSON.parse(localStorage.getItem('users') || '[]');
     const checkoutCustomers = JSON.parse(localStorage.getItem('customers') || '[]');
@@ -1545,8 +1822,8 @@ function openProductGallery(product){
 
     if (!urls.length){
         container.innerHTML = '<p style="color:var(--gray-500)">Nenhuma imagem cadastrada para este produto.</p>';
-    } else {
-        container.innerHTML = urls.map(u => `<img src="${u}" alt="${product.name}">`).join('');
+        } else {
+        container.innerHTML = urls.map(u => `<img src="${u || 'logo-e2w.jpeg'}" alt="${product.name}" onerror="this.onerror=null;this.src='logo-e2w.jpeg'">`).join('');
     }
 
     modal.style.display = 'flex';

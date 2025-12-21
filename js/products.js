@@ -1405,7 +1405,10 @@ const products = [
 // (customProducts em localStorage). A lista mesclada fica em window.products
 // para ser reutilizada em outras partes do site.
 try {
-    const customProductsRaw = JSON.parse(localStorage.getItem('customProducts') || '[]');
+    let customProductsRaw = JSON.parse(localStorage.getItem('customProducts') || '[]');
+    if (!Array.isArray(customProductsRaw)) customProductsRaw = [];
+    // Remover automaticamente produtos de teste cujo nome seja 'teste' (insersões acidentais pelo admin)
+    customProductsRaw = customProductsRaw.filter(cp => !(cp && typeof cp.name === 'string' && cp.name.trim().toLowerCase() === 'teste'));
     const customProducts = Array.isArray(customProductsRaw) ? customProductsRaw.map(cp => ({ ...cp, _isCustom: true })) : [];
     if (customProducts.length) {
         // Clonar os produtos base e remover o campo `price` para garantir que
@@ -1553,7 +1556,7 @@ function loadProducts(category = 'all') {
         return `
             <div class="product-card" data-category="${p.category}">
                 <div class="product-image" onclick="showProductModal(${p.id})">
-                    <img src="${bestImage}" alt="${p.name}" loading="lazy" style="cursor:pointer;object-fit:contain;max-width:100%;max-height:260px;">
+                    <img src="${bestImage}" alt="${p.name}" loading="lazy" style="cursor:pointer;object-fit:contain;max-width:100%;max-height:260px;" onerror="this.onerror=null;this.src='${IMAGE_PLACEHOLDER}'">
                     ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
                 </div>
                     <div class="product-info">

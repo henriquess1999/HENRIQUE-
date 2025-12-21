@@ -1,6 +1,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Coleção de pedidos usada pelo site
+    match /orders/{docId} {
+      // Permite criação apenas por usuários autenticados (ex.: auth anônimo)
+      allow create: if request.auth != null;
+      // Leitura pública (simplificado para o fluxo do admin no navegador)
+      allow read: if true;
+      // Negar atualização/exclusão pelo cliente para evitar sobrescrita
+      allow update, delete: if false;
+    }
+    // Por padrão, negar outras operações
+    match /{document=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
     match /pedidos/{pedidoId} {
       allow read, write: if true;
     }

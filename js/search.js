@@ -387,7 +387,7 @@ function renderFilteredProducts() {
     productsGrid.innerHTML = filtered.map(product => `
         <div class="product-card" data-category="${product.category}">
             <div class="product-image" onclick="showProductModal(${product.id})">
-                <img src="${product.image}" alt="${product.name}" loading="lazy" style="cursor: pointer;">
+                <img src="${product.image || 'logo-e2w.jpeg'}" alt="${product.name}" loading="lazy" style="cursor: pointer;" onerror="this.onerror=null;this.src='logo-e2w.jpeg'">
                 ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
             </div>
             <div class="product-info">

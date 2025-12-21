@@ -9,6 +9,7 @@
 <!-- version query appended to force browser reload when we update the page -->
 <link rel="stylesheet" href="index.css?v=20251201.1">
 <link rel="stylesheet" href="enhanced.css?v=20251201.1">
+<link rel="stylesheet" href="css/responsive.css?v=20251201.1">
 </head>
 
 <body>
@@ -53,6 +54,7 @@
             <a href="#produtos-industriais" class="btn btn-primary btn-lg" style="font-size:1rem;padding:0.6rem 1.6rem;">Ver Produtos</a>
         </div>
     </section>
+    <!-- Firebase removed: compatibility scripts and init not included -->
     <!-- Hero Section with Video/Slider -->
     <section class="hero" id="home">
         <div class="hero-slider" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 220px;">
@@ -60,10 +62,10 @@
                 <a href="#produtos-anmax" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('all'); location.hash='produtos-anmax';" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
                     <img src="https://anmax.com.br/wp-content/uploads/2024/09/logo-anmax.png" alt="Logo Anmax" style="max-width: 260px; min-width: 120px; filter: contrast(1.18) brightness(1.13) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
                 </a>
-                <!-- Novo botão ao lado do Anmax (Sorrag) -->
-                <a id="hero-sorrag-btn" href="#produtos-sorrag" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('sorrag'); setTimeout(function(){ var el = document.getElementById('produtos-sorrag'); if(el) el.scrollIntoView({behavior:'smooth', block: 'start'}); else location.hash='produtos-sorrag'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.2rem 2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2px solid #bfa14a;">
+                <!-- Novo botão ao lado do Anmax (Sorrag) - botão sem href, somente ação de clique -->
+                <button id="hero-sorrag-btn" type="button" onclick="window.forceFirstPage=true; loadProducts('sorrag'); setTimeout(function(){ var el = document.getElementById('produtos-sorrag'); if(el) el.scrollIntoView({behavior:'smooth', block: 'start'}); else location.hash='produtos-sorrag'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.2rem 2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2px solid #bfa14a;">
                     <img src="https://www.sorrag.com.br/wp-content/uploads/2024/07/logo-branca-1.png" alt="Logo Sorrag" style="max-width:160px;min-width:80px;width:auto;filter:contrast(1.05) brightness(1.05) saturate(1.05) drop-shadow(0 4px 24px #000a); background:transparent;">
-                </a>
+                </button>
                 <a id="hero-cr-btn" href="#produtos-crn" onclick="event.preventDefault(); window.forceFirstPage=true; loadProducts('brasilcr'); setTimeout(function(){ var el = document.getElementById('cr-novos') || document.getElementById('produtos-crn'); if(el) el.scrollIntoView({behavior:'smooth', block: 'start'}); else location.hash='produtos-crn'; }, 180);" style="background:rgba(34,34,34,0.92);border-radius:2.5rem;padding:1.5rem 3.2rem;display:flex;align-items:center;box-shadow:0 4px 18px #0008;transition:transform 0.2s;cursor:pointer;border:2.5px solid #bfa14a;">
                     <img src="https://cdn.dooca.store/929/files/logo-cr-n-1.png" alt="Logo CRN" style="max-width: 260px; min-width: 120px; filter: contrast(1.18) brightness(1.13) saturate(1.13) drop-shadow(0 4px 32px #000a); background:transparent;">
                 </a>
@@ -115,6 +117,7 @@
     <section class="products-section" id="products">
         <div class="container">
             <div id="produtos-anmax"></div>
+            <div id="produtos-sorrag" style="text-align:center;margin-top:2rem;"></div>
             <div class="section-header">
                 <h2 class="products-standard-title" data-translate="products_title">Nossos Produtos</h2>
                 <div style="display:flex;justify-content:center;align-items:center;margin:1.2rem 0 1.5rem 0;">

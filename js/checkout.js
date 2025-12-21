@@ -3,6 +3,66 @@
 // All interactive functionality
 // ============================================
 
+// Development: força endpoints locais quando aberto via file://
+;(function(){
+    try{
+        // If running on a different origin (like Live Server :5500), point to local API on port 3001
+        const apiHost = 'http://localhost:3001';
+        const isFile = (window.location && window.location.protocol === 'file:');
+        const isSameOriginAPI = window.location && (window.location.host === 'localhost:3001' || window.location.host === '127.0.0.1:3001' || window.location.host === 'localhost:3001');
+        if (!window.CREATE_ORDER_ENDPOINT) {
+            window.CREATE_ORDER_ENDPOINT = isFile || !isSameOriginAPI ? `${apiHost}/api/createOrder` : '/api/createOrder';
+        }
+        if (!window.ORDER_NOTIFY_ENDPOINT) {
+            window.ORDER_NOTIFY_ENDPOINT = isFile || !isSameOriginAPI ? `${apiHost}/api/order-complete` : '/api/order-complete';
+        }
+        if (!window.SMS_NOTIFY_ENDPOINT) {
+            window.SMS_NOTIFY_ENDPOINT = isFile || !isSameOriginAPI ? `${apiHost}/api/notify-sms` : '';
+        }
+    }catch(e){ /* ignore */ }
+})();
+
+// Offline / pending orders helper: tenta reenviar pedidos salvos localmente quando a conexão retorna
+async function attemptToSendOrder(order) {
+    try {
+        // Firestore removed — use backend endpoint only
+
+        // fallback to backend endpoint
+        const endpoint = window.CREATE_ORDER_ENDPOINT || (window.location.protocol === 'file:' ? 'http://localhost:3001/api/createOrder' : '/api/createOrder');
+        try {
+            const resp = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order }) });
+            if (resp && resp.ok) return true;
+        } catch (e) { /* network error */ }
+    } catch (e) {
+        // ignore and return false
+    }
+    return false;
+}
+
+async function resendPendingOrders() {
+    try {
+        const key = 'PENDING_ORDERS';
+        let list = JSON.parse(localStorage.getItem(key) || '[]');
+        if (!Array.isArray(list) || !list.length) return;
+        const remaining = [];
+        for (const o of list) {
+            try {
+                const ok = await attemptToSendOrder(o);
+                if (!ok) remaining.push(o);
+            } catch(e) { remaining.push(o); }
+        }
+        if (remaining.length !== list.length) {
+            localStorage.setItem(key, JSON.stringify(remaining.slice(0,200)));
+            console.info('[checkout] resent pending orders, remaining=', remaining.length);
+        }
+    } catch(e){ console.warn('[checkout] resendPendingOrders failed', e); }
+}
+
+// Tenta reenviar quando reconectar
+window.addEventListener('online', () => { try { resendPendingOrders(); } catch(e){} });
+// E tenta ao carregar a página
+try { resendPendingOrders(); } catch(e){}
+
 // Hero Slider
 let currentSlide = 0;
 const slides = document.querySelectorAll('.hero-slide');
@@ -624,18 +684,101 @@ async function placeOrder() {
         shippingDays: 15
     };
 
+    // If a Firebase web config exists, wait a short time for the client SDK to become ready.
+    const waitForFirebase = (timeout = 3000) => new Promise(resolve => {
+        const start = Date.now();
+        const iv = setInterval(() => {
+            if (window.FIREBASE_CLIENT_READY) { clearInterval(iv); return resolve(true); }
+            if (Date.now() - start > timeout) { clearInterval(iv); return resolve(false); }
+        }, 250);
+    });
+
     try {
-        const CREATE_ENDPOINT = window.CREATE_ORDER_ENDPOINT || '/api/createOrder';
+            if (!navigator.onLine) {
+            alert('Sem conexão de rede. Verifique sua internet e tente novamente.');
+            return;
+        }
         console.log("Pedido enviado:", order);
-        const res = await fetch(CREATE_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ order })
-        });
-        const json = await res.json().catch(() => ({}));
+
+        const CREATE_ENDPOINT = window.CREATE_ORDER_ENDPOINT || (window.location.protocol === 'file:' ? 'http://localhost:3001/api/createOrder' : '/api/createOrder');
+        let res;
+        try {
+            // Firebase foi removido — enviar sempre ao endpoint backend
+            console.info('[placeOrder] firebase removed; sending order to backend endpoint', CREATE_ENDPOINT);
+            res = await fetch(CREATE_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order })
+            });
+        } catch (networkErr) {
+            console.error('[placeOrder] network error when calling create endpoint', CREATE_ENDPOINT, networkErr);
+            // Fallback: save order locally in browser so the user doesn't lose it
+            try {
+                const key = 'PENDING_ORDERS';
+                const existing = JSON.parse(localStorage.getItem(key) || '[]');
+                existing.unshift(Object.assign({}, order, { savedAt: new Date().toISOString(), offline: true }));
+                localStorage.setItem(key, JSON.stringify(existing.slice(0, 200)));
+                // Não usar alert bloqueante — preferir notificação no UI ou console
+                try {
+                    if (typeof showNotification === 'function') {
+                        try { showNotification('Pedido salvo localmente. Será enviado automaticamente quando a conexão retornar.', 'warning'); } catch(e) { console.warn('[placeOrder] showNotification falhou', e); }
+                    } else {
+                        console.warn('Sem conexão com o backend. Pedido salvo localmente.');
+                    }
+                } catch(e) { console.warn('[placeOrder] fallback notify error', e); }
+                window.location.href = `order-success.html?orderId=${encodeURIComponent(order.id)}`;
+                return;
+            } catch (eLocal) {
+                // se não for possível salvar localmente, mostrar mensagem amigável
+                if (CREATE_ENDPOINT.includes('/api/createOrder') && window.location.host && !window.location.host.includes('localhost')) {
+                    alert('Erro ao enviar pedido: backend não acessível a partir deste site hospedado. Contate o administrador ou tente novamente mais tarde.');
+                } else {
+                    alert('Erro de rede ao enviar pedido. Verifique a conectividade e tente novamente.');
+                }
+                return;
+            }
+        }
+
+        let json;
+        try {
+            json = await res.json();
+            try { console.info('[placeOrder] server response', res && res.status, json); } catch(e){}
+        } catch (eParse) {
+            const txt = await res.text().catch(() => null);
+            console.error('[placeOrder] resposta inválida JSON from', CREATE_ENDPOINT, res.status, res.statusText, txt);
+            // envia o texto cru ao servidor para depuração automática
+            try {
+                await fetch(window.CREATE_ORDER_ENDPOINT.replace('/api/createOrder','/api/log-client-error'), {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ endpoint: CREATE_ENDPOINT, status: res.status, statusText: res.statusText, raw: txt })
+                });
+            } catch(e) { console.warn('[placeOrder] falha ao enviar log de cliente', e); }
+                // mostra o corpo cru em alert para diagnóstico rápido (trunca)
+                try {
+                    const preview = (txt || '').toString().slice(0,2000);
+                    alert('Resposta do servidor (não-JSON) — início:\n' + preview + (preview.length>=2000? '\n...[truncado]' : ''));
+                } catch(e) {}
+            alert('Erro inesperado na resposta do servidor. Verifique o console.');
+            return;
+        }
+
         if (!res.ok) {
-            console.error('Falha ao criar pedido', json);
-            alert('Erro ao enviar pedido. Tente novamente.');
+            // tenta extrair texto cru também para diagnóstico
+            let raw = null;
+            try { raw = await res.text(); } catch (e) { raw = null; }
+            console.error('[placeOrder] servidor retornou erro from', CREATE_ENDPOINT, 'status=', res.status, res.statusText, 'json=', json, 'raw=', raw);
+            try {
+                await fetch(window.CREATE_ORDER_ENDPOINT.replace('/api/createOrder','/api/log-client-error'), {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ endpoint: CREATE_ENDPOINT, status: res.status, statusText: res.statusText, json: json, raw })
+                });
+            } catch(e) { console.warn('[placeOrder] falha ao enviar log de cliente', e); }
+                // mostra o corpo cru em alert para diagnóstico rápido (trunca)
+                try {
+                    const preview = ((raw && raw.toString()) || JSON.stringify(json) || '').slice(0,2000);
+                    alert('Resposta do servidor (erro) — início:\n' + preview + (preview.length>=2000? '\n...[truncado]' : ''));
+                } catch(e) {}
+            alert('Erro ao enviar pedido. Veja o console para mais detalhes.');
             return;
         }
         // Ao retornar, servidor deve incluir o pedido salvo. Redireciona para página de sucesso com id.
@@ -652,7 +795,7 @@ async function placeOrder() {
     // Enviar notificação de pedido (SMS) ao admin — configure `SMS_NOTIFY_ENDPOINT` abaixo
     try {
         // endpoint configurável: defina `window.SMS_NOTIFY_ENDPOINT` no HTML (inline) ou substitua aqui
-        const SMS_NOTIFY_ENDPOINT = window.SMS_NOTIFY_ENDPOINT || '';
+        const SMS_NOTIFY_ENDPOINT = window.SMS_NOTIFY_ENDPOINT || (window.location.protocol === 'file:' ? 'http://localhost:3001/api/notify-sms' : '');
         if (SMS_NOTIFY_ENDPOINT) {
             const payload = { order };
 
@@ -692,7 +835,7 @@ async function placeOrder() {
 
     // Notificar o servidor para enviar e-mail ao admin com todos os dados do pedido
     try {
-        const ORDER_NOTIFY_ENDPOINT = window.ORDER_NOTIFY_ENDPOINT || '/api/order-complete';
+        const ORDER_NOTIFY_ENDPOINT = window.ORDER_NOTIFY_ENDPOINT || (window.location.protocol === 'file:' ? 'http://localhost:3001/api/order-complete' : '/api/order-complete');
         const payload = { order };
         // Envia sem bloquear, mas tenta breve timeout antes do redirecionamento
         const fetchWithTimeout = (url, options, timeout = 4000) => {

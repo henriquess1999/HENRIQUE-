@@ -16,11 +16,13 @@
     if (username !== ADMIN_USERNAME) return false;
     const ok = password === getPassword();
     if (ok){
-      localStorage.setItem(SESSION_KEY, JSON.stringify({
+      const sessionObj = {
         username: ADMIN_USERNAME,
         loginTime: new Date().toISOString(),
         token: btoa(ADMIN_USERNAME + ':' + Date.now())
-      }));
+      };
+      try { localStorage.setItem(SESSION_KEY, JSON.stringify(sessionObj)); } catch(e) { /* ignore */ }
+      try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionObj)); } catch(e) { /* ignore */ }
     }
     return ok;
   }
@@ -33,7 +35,8 @@
   }
 
   function logout(){
-    localStorage.removeItem(SESSION_KEY);
+    try { localStorage.removeItem(SESSION_KEY); } catch(e) { /* ignore */ }
+    try { sessionStorage.removeItem(SESSION_KEY); } catch(e) { /* ignore */ }
   }
 
   function setOtp(code, email, ttlMinutes){
