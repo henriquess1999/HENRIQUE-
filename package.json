@@ -13,7 +13,6 @@
   "dependencies": {
     "express": "^4.19.2",
     "dotenv": "^16.4.5",
-    
     "minimist": "^1.2.8",
     "resend": "^3.0.0",
     "twilio": "^4.22.0"

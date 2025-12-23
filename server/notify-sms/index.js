@@ -6,26 +6,6 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.json({ limit: '256kb' }));
-
-const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-const ADMIN_PHONE = process.env.ADMIN_PHONE || ''; // E.164 format, e.g. +5511999999999
-const RESEND_FROM = process.env.RESEND_FROM || ''; // optional sender id/phone
-
-// Vonage (optional fallback)
-const VONAGE_API_KEY = process.env.VONAGE_API_KEY || '';
-const VONAGE_API_SECRET = process.env.VONAGE_API_SECRET || '';
-const VONAGE_FROM = process.env.VONAGE_FROM || 'Vonage APIs';
-// Email / SMTP config
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || ''; // admin email to receive order details
-const EMAIL_FROM = process.env.EMAIL_FROM || `no-reply@${process.env.DOMAIN || 'example.com'}`;
-const SMTP_HOST = process.env.SMTP_HOST || '';
-const SMTP_PORT = process.env.SMTP_PORT || '';
-require('dotenv').config();
-const express = require('express');
-const app = express();
-const port = process.env.PORT || 3000;
-
 // Basic CORS for local testing (adjust for production)
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -37,16 +17,14 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: '256kb' }));
 
-// Environment
+// Environment / config
 const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-const ADMIN_PHONE = process.env.ADMIN_PHONE || ''; // E.164
+const ADMIN_PHONE = process.env.ADMIN_PHONE || ''; // E.164 format, e.g. +5511999999999
 const RESEND_FROM = process.env.RESEND_FROM || '';
-
 const VONAGE_API_KEY = process.env.VONAGE_API_KEY || '';
 const VONAGE_API_SECRET = process.env.VONAGE_API_SECRET || '';
 const VONAGE_FROM = process.env.VONAGE_FROM || 'Vonage APIs';
-
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || ''; // admin email to receive order details
 const EMAIL_FROM = process.env.EMAIL_FROM || `no-reply@${process.env.DOMAIN || 'example.com'}`;
 const SMTP_HOST = process.env.SMTP_HOST || '';
 const SMTP_PORT = process.env.SMTP_PORT || '';
@@ -324,112 +302,6 @@ app.get('/api/diag', (req, res) => {
 });
 
 app.listen(port, () => console.log(`notify-sms server listening on port ${port}`));
-        ${itemsHtml}
-      </tbody>
-    </table>
-    <h4>Dados completos (JSON)</h4>
-    <pre style="white-space:pre-wrap;background:#f6f8fa;padding:8px;border-radius:6px">${JSON.stringify(order, null, 2)}</pre>
-  `;
-
-  // If RESEND_API_KEY is available, try Resend Email API first (preferred when using Resend)
-  if (RESEND_API_KEY) {
-    try {
-      const resendUrl = 'https://api.resend.com/emails';
-      const body = {
-        from: EMAIL_FROM,
-        to: Array.isArray(ADMIN_EMAIL) ? ADMIN_EMAIL : [ADMIN_EMAIL],
-        subject,
-        html
-      };
-      console.log('[sendOrderEmail] Sending via Resend API (masked keys).');
-      const resp = await fetch(resendUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-      const respText = await resp.text().catch(() => '');
-      console.log('[sendOrderEmail] Resend response status:', resp.status);
-      console.log('[sendOrderEmail] Resend response body (truncated):', (respText && respText.slice) ? respText.slice(0,2000) : respText);
-      if (resp.ok) {
-        try { return { ok: true, provider: 'resend', result: JSON.parse(respText || '{}') }; } catch(e) { return { ok:true, provider:'resend', result: respText }; }
-      }
-      // If Resend returned non-OK, continue to attempt SMTP as fallback
-      console.warn('[sendOrderEmail] Resend API returned non-OK, falling back to SMTP if configured.');
-    } catch (err) {
-      console.error('[sendOrderEmail] Resend API error', err && err.message ? err.message : err);
-      // continue to SMTP fallback
-    }
-  }
-
-  // Fallback to SMTP (nodemailer) if configured
-  if (SMTP_HOST && SMTP_USER) {
-    try {
-      const portNum = Number(SMTP_PORT) || (SMTP_PORT ? Number(SMTP_PORT) : (SMTP_HOST.includes('gmail') ? 465 : 587));
-      const transporter = nodemailer.createTransport({
-        host: SMTP_HOST,
-        port: portNum,
-        secure: portNum === 465,
-        auth: SMTP_USER ? { user: SMTP_USER, pass: SMTP_PASS } : undefined
-      });
-      const info = await transporter.sendMail({ from: EMAIL_FROM, to: ADMIN_EMAIL, subject, html });
-      console.log('[sendOrderEmail] email sent via SMTP:', info && (info.messageId || info.response) ? (info.messageId || info.response) : info);
-      return { ok: true, provider: 'smtp', result: { messageId: info.messageId || null, response: info.response || null } };
-    } catch (err) {
-      console.error('[sendOrderEmail] SMTP sendMail error', err && err.message ? err.message : err);
-      return { ok: false, error: 'smtp_send_failed', detail: err && err.message ? err.message : String(err) };
-    }
-  }
-
-  return { ok: false, error: 'no_email_provider_configured' };
-}
-
-// sendProductEmail: envia email específico sobre um item do pedido para o fornecedor/contato do produto
-async function sendProductEmail(item, order, toAddress) {
-  if (!toAddress) return { ok: false, error: 'no_to_address' };
-  const subject = `Pedido ${order.id} - Pedido do produto ${(item.name||item.title||item.productName||item.id||'produto')}`;
-  const qty = Number(item.quantity || 1);
-  const price = Number(item.price || item.unitPrice || 0).toFixed(2);
-  const html = `
-    <h3>Pedido ${order.id} - Produto ${(item.name||item.title||item.productName||item.id||'produto')}</h3>
-    <p><strong>Cliente:</strong> ${(order.customer && order.customer.name) || '—'} — ${(order.customer && order.customer.email) || '—'}</p>
-    <p><strong>Quantidade:</strong> ${qty}</p>
-    <p><strong>Preço unitário:</strong> R$ ${price}</p>
-    <p><strong>Total do pedido:</strong> R$ ${Number(order.total || order.subtotal || 0).toFixed(2)}</p>
-    <pre style="white-space:pre-wrap;background:#f6f8fa;padding:8px;border-radius:6px">${JSON.stringify({ orderId: order.id, item, customer: order.customer }, null, 2)}</pre>
-  `;
-
-  // Try Resend first
-  if (RESEND_API_KEY) {
-    try {
-      const resendUrl = 'https://api.resend.com/emails';
-      const body = { from: EMAIL_FROM, to: Array.isArray(toAddress)? toAddress : [toAddress], subject, html };
-      const resp = await fetch(resendUrl, { method: 'POST', headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      const respText = await resp.text().catch(()=>'');
-      if (resp.ok) { try { return { ok:true, provider:'resend', result: JSON.parse(respText || '{}') } } catch(e){ return { ok:true, provider:'resend', result: respText } } }
-      console.warn('[sendProductEmail] Resend non-OK:', resp.status, respText);
-    } catch (err) {
-      console.error('[sendProductEmail] Resend error', err && err.message ? err.message : err);
-    }
-  }
-
-  // Fallback SMTP
-  if (SMTP_HOST && SMTP_USER) {
-    try {
-      const portNum = Number(SMTP_PORT) || (SMTP_PORT ? Number(SMTP_PORT) : (SMTP_HOST.includes('gmail') ? 465 : 587));
-      const transporter = nodemailer.createTransport({ host: SMTP_HOST, port: portNum, secure: portNum === 465, auth: SMTP_USER ? { user: SMTP_USER, pass: SMTP_PASS } : undefined });
-      const info = await transporter.sendMail({ from: EMAIL_FROM, to: toAddress, subject, html });
-      return { ok:true, provider:'smtp', result: { messageId: info.messageId || null, response: info.response || null } };
-    } catch (err) {
-      console.error('[sendProductEmail] SMTP error', err && err.message ? err.message : err);
-      return { ok:false, error:'smtp_failed', detail: err && err.message ? err.message : String(err) };
-    }
-  }
-
-  return { ok:false, error:'no_email_provider_configured' };
-}
 
 /*
   Notes:

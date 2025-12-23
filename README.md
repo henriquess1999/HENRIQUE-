@@ -8,12 +8,12 @@ Principais pontos:
 - Frontend: arquivos HTML/CSS/JS em raiz e `js/`.
 - Admin: painel em `admin-dashboarrd.html` com lógica em `js/admin.js`.
 - Envio de e-mails: `emailService.js` com suporte Resend + fallback SMTP.
-- Endpoint serverless: `api/order-complete.js` pronta para Vercel.
+- Endpoint serverless: `api/order-complete.js` (API handler para envio de e-mails / notificações).
 
-Deploy recomendado (Vercel):
-1. Conectar este repositório no Vercel.
+Deploy recomendado:
+1. Conectar este repositório na plataforma de sua escolha (Render, Heroku, Railway, etc.).
 2. Configurar variáveis de ambiente: `ADMIN_EMAIL`, `EMAIL_FROM`, `RESEND_API_KEY` (opcional), `SMTP_*` (opcional).
-3. Fazer deploy. O arquivo `vercel.json` já contém regras básicas de headers.
+3. Fazer deploy conforme as instruções da plataforma escolhida.
 
 Como contribuir / fluxo rápido:
 1. Criar uma branch a partir de `main`.

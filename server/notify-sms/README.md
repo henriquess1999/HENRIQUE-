@@ -47,7 +47,7 @@ npm start
 ```
 
 Deploy
-- Você pode deployar em Vercel (serverless functions), Render, Heroku, Railway etc. Ajuste as variáveis de ambiente na plataforma escolhida.
+- Você pode deployar em Render, Heroku, Railway etc. Ajuste as variáveis de ambiente na plataforma escolhida.
 
 - No frontend (`js/checkout.js`) há suporte para enviar a notificação POST para um endpoint configurável. Defina `window.SMS_NOTIFY_ENDPOINT = 'https://seu-dominio.com/api/notify-sms'` no HTML (por exemplo em `checkout.html`) ou substitua o valor diretamente no JS.
 

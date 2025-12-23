@@ -2,7 +2,7 @@ const { enviarEmail } = require('../emailService');
 const https = require('https');
 const { URL } = require('url');
 
-// Vercel Serverless handler
+// Serverless / API handler
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.statusCode = 405;
@@ -61,7 +61,7 @@ module.exports = async (req, res) => {
     }
 
     // Optional: forward order to a central storage endpoint if configured
-    // Useful when this function runs on serverless (Vercel) and there's a persistent server
+    // Useful when this function runs serverless and there's a persistent server
     try {
       const storageEndpoint = process.env.STORAGE_ENDPOINT || process.env.STORAGE_URL || null;
       if (storageEndpoint) {

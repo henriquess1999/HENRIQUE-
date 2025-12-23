@@ -1456,7 +1456,7 @@ window.products.forEach(product => {
             }
         });
         window.promoSelection = eligible.filter((_, idx) => idx % 2 === 0).map(p => ({ id: p.id, name: p.name }));
-        console.log('Promoção alternada aplicada em', applied, 'produtos ANMAX');
+        console.debug('Promoção alternada aplicada em', applied, 'produtos ANMAX');
     } catch (e) {
         console.warn('Falha ao marcar promoções:', e);
     }
@@ -1936,10 +1936,10 @@ window.showProductModal = function showProductModal(productId) {
 
 // initialize on DOM ready
 document.addEventListener('DOMContentLoaded', function(){
-    console.log('DOM loaded, loading products...');
+    console.debug('DOM loaded, loading products...');
     if (typeof loadProducts === 'function') {
         loadProducts();
-        console.log('Products loaded successfully');
+        console.debug('Products loaded successfully');
     } else {
         console.error('loadProducts function not found');
     }
@@ -1950,6 +1950,6 @@ if (document.readyState === 'loading') {
     // DOM still loading
 } else {
     // DOM already loaded
-    console.log('DOM already ready, loading products immediately...');
+    console.debug('DOM already ready, loading products immediately...');
     if (typeof loadProducts === 'function') loadProducts();
 }

@@ -6,6 +6,16 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { enviarEmail } = require('./emailService');
+// Supabase order helpers (optional)
+let insertClientSupabase, createOrderSupabase, insertOrderItemsSupabase;
+try {
+  const ordersDb = require('./server/orders');
+  insertClientSupabase = ordersDb.insertClient;
+  createOrderSupabase = ordersDb.createOrder;
+  insertOrderItemsSupabase = ordersDb.insertOrderItems;
+} catch (e) {
+  // not available or not configured
+}
 
 // Firestore support removed from this project.
 // The application will use local file storage for orders and related data.
@@ -317,9 +327,47 @@ const server = http.createServer(async (req, res)=>{
       // garante id caso front não envie
       if (!order.id) order.id = 'ORD-' + Date.now();
 
-      // grava pedido no Firestore se disponível, senão em arquivo local
-      // Tenta salvar no Firestore quando disponível; se falhar, faz fallback para arquivo local
+      // grava pedido no Supabase/Firestore se disponível, senão em arquivo local
+      // Tenta salvar no Supabase (quando configurado) -> Firestore -> arquivo local
       let savedVia = null;
+
+      // Attempt Supabase saving when service role is configured
+      try {
+        if (insertClientSupabase && createOrderSupabase) {
+          try {
+            const customer = order.customer || order.customerInfo || order.client || {};
+            const clientPayload = {
+              nome: (customer.name || customer.nome || customer.fullname) || (order.customer && order.customer.name) || 'Cliente',
+              email: customer.email || customer.mail || null,
+              telefone: customer.phone || customer.telefone || null,
+              endereco: customer.address ? { address: customer.address, city: customer.city, state: customer.state, country: customer.country } : null
+            };
+            const insertedClient = await insertClientSupabase(clientPayload);
+            const orderPayload = {
+              id: order.id,
+              cliente_id: insertedClient.id,
+              total: Number(order.total || order.subtotal || 0),
+              status: order.status || order.state || 'pendente',
+              metadata: Object.assign({}, order)
+            };
+            const createdOrder = await createOrderSupabase(orderPayload);
+            const items = Array.isArray(order.items) ? order.items.map(i => ({
+              pedido_id: createdOrder.id,
+              product_id: i.id || i.product_id || null,
+              name: i.name || i.title || i.productName || null,
+              quantity: Number(i.quantity || i.qty || 1),
+              unit_price: Number(i.price || i.unit_price || 0),
+              metadata: i
+            })) : [];
+            if (items.length && insertOrderItemsSupabase) await insertOrderItemsSupabase(items);
+            savedVia = 'supabase';
+            // attach created data back to order for response
+            order._supabase = { cliente: insertedClient, pedido: createdOrder, itens_count: items.length };
+          } catch (eSup) {
+            console.warn('[createOrder] supabase save failed', eSup && (eSup.message || eSup));
+          }
+        }
+      } catch(e){ /* ignore supabase attempt errors and continue to other backends */ }
       if (firestoreClient) {
         try {
           const docRef = firestoreClient.collection('orders').doc(String(order.id));
@@ -540,6 +588,14 @@ const server = http.createServer(async (req, res)=>{
     }
   }
 
+  // Se for GET e não foi atendido por uma API, tente servir um arquivo estático
+  if (req.method === 'GET'){
+    try{
+      const served = await serveStaticFile(req, res);
+      if (served) return;
+    }catch(e){ /* ignore and fallthrough to 404 */ }
+  }
+
   sendJson(res, 404, { error: 'Not found' });
 });
 
@@ -563,6 +619,8 @@ async function serveStaticFile(req, res) {
       '.png': 'image/png',
       '.jpg': 'image/jpeg',
       '.jpeg': 'image/jpeg',
+      '.webp': 'image/webp',
+      '.mp4': 'video/mp4',
       '.svg': 'image/svg+xml',
       '.ico': 'image/x-icon'
     };
@@ -582,6 +640,7 @@ server.on('request', (req, res) => {
 });
 
 
-const PORT = process.env.PORT || 3001; // usa a porta do Vercel ou 3001 local
-server.listen(PORT, () => console.log(`Rodando na porta ${PORT} (HTTP nativo)`));
+const PORT = process.env.PORT || 3001; // usa a porta de ambiente ou 3001 local
+// Escuta em 0.0.0.0 para garantir que conexões para 127.0.0.1/localhost funcionem no Windows
+server.listen(PORT, '0.0.0.0', () => console.log(`Servidor rodando na porta ${PORT} (HTTP nativo) - escutando em 0.0.0.0)`));
 

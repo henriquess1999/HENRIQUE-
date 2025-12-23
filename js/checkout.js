@@ -698,7 +698,7 @@ async function placeOrder() {
             alert('Sem conexão de rede. Verifique sua internet e tente novamente.');
             return;
         }
-        console.log("Pedido enviado:", order);
+        console.debug("Pedido enviado:", order);
 
         const CREATE_ENDPOINT = window.CREATE_ORDER_ENDPOINT || (window.location.protocol === 'file:' ? 'http://localhost:3001/api/createOrder' : '/api/createOrder');
         let res;

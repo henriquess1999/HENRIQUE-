@@ -813,7 +813,7 @@ function deleteSale(saleId) {
     if (!confirm('Tem certeza que deseja excluir esta venda permanentemente?')) return;
 
     // Remove localmente
-    let sales = JSON.parse(localStorage.getItem('sales') || '[]');
+        let sales = JSON.parse(localStorage.getItem('sales') || '[]');
     const before = sales.length;
     sales = sales.filter(s => String(s.id) !== String(saleId));
     localStorage.setItem('sales', JSON.stringify(sales));
@@ -835,7 +835,7 @@ function deleteSale(saleId) {
             const apiHost = (window.location && window.location.host && (window.location.host.includes('localhost') || window.location.host.includes('127.0.0.1'))) ? '' : 'http://localhost:3001';
             const url = apiHost + '/api/sales?id=' + encodeURIComponent(saleId);
             const resp = await fetch(url, { method: 'DELETE' });
-            try { const j = await resp.json(); console.log('[deleteSale] server', j); } catch(e){ console.log('[deleteSale] server non-json'); }
+                try { const j = await resp.json(); console.debug('[deleteSale] server', j); } catch(e){ console.debug('[deleteSale] server non-json'); }
         }catch(e){ console.warn('[deleteSale] failed to call server delete', e); }
     })();
 
@@ -1349,7 +1349,7 @@ function updateOrderStatus(orderId, direction) {
                     const apiHost = (window.location && window.location.host && (window.location.host.includes('localhost') || window.location.host.includes('127.0.0.1'))) ? '' : 'http://localhost:3001';
                     const url = apiHost + '/api/sales';
                     const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    try { console.log('[persistSale] server response', await resp.json()); } catch(e){ console.log('[persistSale] non-json'); }
+                    try { console.debug('[persistSale] server response', await resp.json()); } catch(e){ console.debug('[persistSale] non-json'); }
                 }catch(e){ console.warn('[persistSale] failed', e); }
             })();
         }
@@ -1376,7 +1376,7 @@ function updateOrderStatus(orderId, direction) {
             try {
                 const apiHost = (window.location && window.location.host && (window.location.host.includes('localhost') || window.location.host.includes('127.0.0.1'))) ? '' : 'http://localhost:3001';
                 const resp = await fetch(apiHost + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: current }) });
-                try { console.log('[updateOrderStatus] persisted remote order', await resp.json()); } catch(e) { console.log('[updateOrderStatus] persisted remote order (non-json)'); }
+                try { console.debug('[updateOrderStatus] persisted remote order', await resp.json()); } catch(e) { console.debug('[updateOrderStatus] persisted remote order (non-json)'); }
             } catch(e) { console.warn('[updateOrderStatus] failed to persist remote order', e); }
         })();
     }
@@ -1408,7 +1408,7 @@ function updateOrderStatus(orderId, direction) {
             const url = apiHost + '/api/orders';
             const payload = { order: current };
             const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            try { const j = await resp.json(); console.log('[updateOrderStatus] upsert response', j); } catch(e){ console.log('[updateOrderStatus] non-json response'); }
+            try { const j = await resp.json(); console.debug('[updateOrderStatus] upsert response', j); } catch(e){ console.debug('[updateOrderStatus] non-json response'); }
         } catch(e){ console.warn('[updateOrderStatus] failed to persist order status', e); }
     })();
 }
@@ -1669,7 +1669,7 @@ function deleteOrder(orderId) {
             for (const origin of origins) {
                 // First try DELETE
                 const r = await tryDelete(origin);
-                console.log('[deleteOrder] attempt DELETE', origin || '(relative)', r);
+                console.debug('[deleteOrder] attempt DELETE', origin || '(relative)', r);
                 if (r && r.ok) { finalResult = r; break; }
 
                 // If DELETE failed or returned non-ok, try POST fallback with _method=DELETE
@@ -1678,7 +1678,7 @@ function deleteOrder(orderId) {
                     const resp2 = await fetch(fallbackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: orderId }) });
                     let body2 = null;
                     try { body2 = await resp2.json(); } catch(e) { body2 = null; }
-                    console.log('[deleteOrder] attempt POST-fallback', origin || '(relative)', resp2 && resp2.status, body2);
+                    console.debug('[deleteOrder] attempt POST-fallback', origin || '(relative)', resp2 && resp2.status, body2);
                     if (resp2 && resp2.ok) { finalResult = { ok: resp2.ok, status: resp2.status, body: body2 }; break; }
                 } catch(e) {
                     console.warn('[deleteOrder] POST-fallback error for origin', origin, e);
@@ -1931,4 +1931,4 @@ if (!document.getElementById('message-card-styles')) {
     document.head.appendChild(styles);
 }
 
-console.log('✅ Admin Dashboard loaded successfully!');
+console.debug('✅ Admin Dashboard loaded successfully!');
